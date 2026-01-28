@@ -1,0 +1,155 @@
+
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>ScamTycoon: Empire</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              background: '#0F1014',
+              surface: '#181920',
+              surfaceHighlight: '#23242F',
+              primary: '#6C5DD3',
+              secondary: '#FF754C',
+              accent: '#3F8CFF',
+              success: '#7FBA7A',
+              danger: '#FF4C4C',
+            },
+            fontFamily: {
+              sans: ['Rubik', 'sans-serif'],
+              mono: ['JetBrains Mono', 'monospace'],
+            },
+            animation: {
+              'bounce-soft': 'bounceSoft 2s infinite',
+              'pop': 'pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
+              'float': 'float 6s ease-in-out infinite',
+              'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+              'scanline': 'scanline 8s linear infinite',
+              'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            },
+            keyframes: {
+              bounceSoft: {
+                '0%, 100%': { transform: 'translateY(-5%)' },
+                '50%': { transform: 'translateY(0)' },
+              },
+              pop: {
+                '0%': { transform: 'scale(0.9)', opacity: 0 },
+                '100%': { transform: 'scale(1)', opacity: 1 },
+              },
+              float: {
+                '0%, 100%': { transform: 'translateY(0)' },
+              },
+              slideUp: {
+                '0%': { transform: 'translateY(100%)' },
+                '100%': { transform: 'translateY(0)' },
+              },
+              scanline: {
+                '0%': { transform: 'translateY(-100%)' },
+                '100%': { transform: 'translateY(100%)' },
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;900&family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --bg-color: #0F1014;
+        --text-main: #FFFFFF;
+      }
+      body {
+        background-color: var(--bg-color);
+        color: var(--text-main);
+        font-family: 'Rubik', sans-serif;
+        overflow: hidden;
+        touch-action: none;
+        -webkit-font-smoothing: antialiased;
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-tap-highlight-color: transparent;
+        overscroll-behavior: none;
+      }
+      
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      
+      @keyframes floatUp {
+        0% { transform: translateY(0) scale(1) rotate(0deg); opacity: 1; }
+        100% { transform: translateY(-150px) scale(1.4) rotate(15deg); opacity: 0; }
+      }
+      .float-text {
+        position: absolute;
+        pointer-events: none;
+        animation: floatUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        font-weight: 900;
+        z-index: 99999;
+        text-shadow: 0 0 10px rgba(255,255,255,0.5), 0 2px 4px rgba(0,0,0,0.5);
+      }
+
+      .glass-panel {
+        background: rgba(24, 25, 32, 0.85);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+      
+      .bg-grid-pattern {
+        background-size: 40px 40px;
+        background-image: 
+          radial-gradient(circle, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      }
+
+      .terminal-text {
+        font-family: 'JetBrains Mono', monospace;
+        text-shadow: 0 0 5px rgba(108, 93, 211, 0.5);
+      }
+
+      .scanline-overlay {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.2) 50%);
+        background-size: 100% 4px;
+        z-index: 9999;
+        pointer-events: none;
+        opacity: 0.15;
+      }
+
+      .crt-flicker {
+        animation: flicker 0.15s infinite;
+      }
+
+      @keyframes flicker {
+        0% { opacity: 0.97; }
+        100% { opacity: 1; }
+      }
+    </style>
+
+<!-- Styles are embedded in this HTML file -->
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.4",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "lucide-react": "https://esm.sh/lucide-react@^0.563.0",
+    "vite": "https://esm.sh/vite@^7.3.1",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2"
+  }
+}
+</script>
+  <script type="module" crossorigin src="./assets/index-CvgHF-i2.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/ui-I1aVrZiG.js">
+  <link rel="modulepreload" crossorigin href="./assets/vendor-xuqso_ta.js">
+</head>
+  <body>
+    <div class="scanline-overlay"></div>
+    <div id="root"></div>
+  </body>
+</html>
