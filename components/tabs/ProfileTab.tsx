@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
-import { GameState, JobPosition, BusinessStage } from '../../types';
-import { CAREER_LADDER, MARKET_ITEMS, PROPERTIES, CHARACTER_STAGES, SKILLS } from '../../constants';
+import { GameState, JobPosition } from '../../types';
+import { CAREER_LADDER, CHARACTER_STAGES, SKILLS, MARKET_ITEMS, PROPERTIES } from '../../constants';
 import { formatMoney } from '../../utils/format';
-import { HelpCircle, Briefcase, Award, CheckCircle2, Lock, Timer, Zap, Sparkles } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 
 interface ProfileTabProps {
   gameState: GameState;
@@ -26,8 +26,7 @@ const checkRequirement = (job: JobPosition, state: GameState) => {
             label: `Актив: ${PROPERTIES.find(p => p.id === job.reqPropertyId)?.name || 'Имущество'}` 
         } : null
     };
-    const allMet = Object.values(checks).filter(c => c !== null).every(c => c.met);
-    return { checks, allMet };
+    return { checks, allMet: Object.values(checks).filter(c => c !== null).every(c => c.met) };
 };
 
 export const ProfileTab: React.FC<ProfileTabProps> = ({ gameState, currentJob, promote, openManual, upgradeSkill }) => {
@@ -61,11 +60,6 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ gameState, currentJob, p
 
         {activeTab === 'SKILLS' && (
             <div className="space-y-4 animate-fade-in">
-                <div className="p-4 bg-primary/10 rounded-2xl flex items-center gap-3 border border-primary/20">
-                    <Sparkles className="text-primary" size={20} />
-                    <p className="text-[10px] text-primary font-bold uppercase">Улучшайте навыки за XP, чтобы снизить риски и повысить доход.</p>
-                </div>
-
                 <div className="grid grid-cols-1 gap-3">
                     {SKILLS.map(skill => {
                         const level = gameState.skills[skill.id] || 0;
@@ -113,7 +107,6 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ gameState, currentJob, p
                     const isPassed = idx < currentIdx;
                     const isNext = idx === currentIdx + 1;
                     const { checks, allMet } = checkRequirement(job, gameState);
-                    
                     const nextAvailableAt = gameState.lastPromotionTime + ((job.promotionCooldownHours || 0) * 3600000);
                     const isWaiting = isNext && now < nextAvailableAt;
 
@@ -143,7 +136,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ gameState, currentJob, p
                                         <button 
                                             disabled={!allMet || isWaiting}
                                             onClick={() => promote(job.id)}
-                                            className={`mt-3 w-full py-4 rounded-xl font-black text-xs uppercase tracking-widest transition-all ${allMet && !isWaiting ? 'bg-white text-black' : 'bg-surfaceHighlight text-slate-600'}`}
+                                            className={`mt-3 w-full py-4 rounded-xl font-black text-xs uppercase tracking-widest transition-all ${allMet && !isWaiting ? 'bg-white text-black shadow-lg shadow-white/10 active:scale-95' : 'bg-surfaceHighlight text-slate-600'}`}
                                         >
                                             {isWaiting ? 'ОЖИДАНИЕ КУЛДАУНА...' : allMet ? 'ПОВЫСИТЬСЯ' : 'УСЛОВИЯ НЕ ВЫПОЛНЕНЫ'}
                                         </button>

@@ -1,7 +1,7 @@
 
 import { UpgradeItem, JobPosition, VerticalType, UpgradeType, PropertyItem, BusinessStage, LaunderingItem, TeamStrategy, AssetItem, AssetType, SchemeItem, SchemeCategory, Skill, DropItem } from './types';
 
-export const CREATE_TEAM_COST = 50000; 
+export const CREATE_TEAM_COST = 25000; 
 export const WORKER_HIRE_COST_BASE = 500; 
 export const BASE_BANK_LIMIT = 5000; 
 export const PROMOTION_COOLDOWN_DEFAULT = 8; 
@@ -55,7 +55,7 @@ export const CAREER_LADDER: JobPosition[] = [
     salaryPerClick: 25,
     passiveIncome: 5,
     requiredReputation: 10,
-    costToPromote: 2500,
+    costToPromote: 1000,
     isManager: false,
     reqBusinessStage: BusinessStage.NONE,
     reqUpgradeId: 'tool_vpn',
@@ -69,14 +69,14 @@ export const CAREER_LADDER: JobPosition[] = [
     vertical: 'Опытный скамер',
     salaryPerClick: 120,
     passiveIncome: 40,
-    requiredReputation: 100,
-    costToPromote: 30000,
+    requiredReputation: 50,
+    costToPromote: 15000,
     isManager: false,
     reqBusinessStage: BusinessStage.NONE,
     reqPropertyId: 'prop_iphone',
     baseRisk: 3,
     description: 'Ты учишь новичков обходить антифрод. Твой статус в чате растет.',
-    promotionCooldownHours: 1
+    promotionCooldownHours: 0.5
   },
   {
     id: 'job_support',
@@ -84,14 +84,14 @@ export const CAREER_LADDER: JobPosition[] = [
     vertical: 'Техническая помощь',
     salaryPerClick: 450,
     passiveIncome: 150,
-    requiredReputation: 500,
-    costToPromote: 250000,
+    requiredReputation: 250,
+    costToPromote: 100000,
     isManager: false,
     reqBusinessStage: BusinessStage.NONE,
     reqPropertyId: 'prop_macbook',
     baseRisk: 6,
     description: 'Отвечаешь на тикеты и помогаешь заводить мамонтов. Нужно серьезное железо.',
-    promotionCooldownHours: 2
+    promotionCooldownHours: 1
   },
   {
     id: 'job_closer',
@@ -99,14 +99,14 @@ export const CAREER_LADDER: JobPosition[] = [
     vertical: 'Закрытие сделок',
     salaryPerClick: 2000,
     passiveIncome: 800,
-    requiredReputation: 2500,
-    costToPromote: 2000000,
+    requiredReputation: 1000,
+    costToPromote: 1000000,
     isManager: false,
     reqBusinessStage: BusinessStage.NONE,
     reqUpgradeId: 'soft_drainer',
     baseRisk: 10,
     description: 'Когда мамонт готов, приходишь ты и забираешь всё. Твой инструмент - Дрейнер.',
-    promotionCooldownHours: 4
+    promotionCooldownHours: 2
   },
   {
     id: 'job_team_lead',
@@ -114,13 +114,13 @@ export const CAREER_LADDER: JobPosition[] = [
     vertical: 'Управление командой',
     salaryPerClick: 10000,
     passiveIncome: 5000,
-    requiredReputation: 10000,
-    costToPromote: 25000000,
+    requiredReputation: 5000,
+    costToPromote: 10000000,
     isManager: true,
     reqBusinessStage: BusinessStage.REMOTE_TEAM,
     baseRisk: 15,
     description: 'Ключевой ранг. Теперь у тебя своя тима воркеров. Начинай строить бизнес.',
-    promotionCooldownHours: 8
+    promotionCooldownHours: 4
   },
   {
     id: 'job_hr',
@@ -128,14 +128,14 @@ export const CAREER_LADDER: JobPosition[] = [
     vertical: 'Рекрутинг',
     salaryPerClick: 50000,
     passiveIncome: 25000,
-    requiredReputation: 50000,
-    costToPromote: 500000000,
+    requiredReputation: 25000,
+    costToPromote: 100000000,
     isManager: true,
     reqBusinessStage: BusinessStage.REMOTE_TEAM,
-    reqWorkers: 10,
+    reqWorkers: 5,
     baseRisk: 22,
     description: 'Ты нанимаешь лучших. Масштабируй команду, чтобы захватить рынок.',
-    promotionCooldownHours: 12
+    promotionCooldownHours: 8
   },
   {
     id: 'job_admin',
@@ -143,13 +143,13 @@ export const CAREER_LADDER: JobPosition[] = [
     vertical: 'Владелец сети',
     salaryPerClick: 250000,
     passiveIncome: 150000,
-    requiredReputation: 250000,
-    costToPromote: 15000000000,
+    requiredReputation: 100000,
+    costToPromote: 5000000000,
     isManager: true,
     reqBusinessStage: BusinessStage.NETWORK,
     baseRisk: 35,
     description: 'Владелец сети офисов. Твой процент со всех сделок огромен.',
-    promotionCooldownHours: 24
+    promotionCooldownHours: 12
   },
   {
     id: 'job_lord',
@@ -157,8 +157,8 @@ export const CAREER_LADDER: JobPosition[] = [
     vertical: 'Теневой Король',
     salaryPerClick: 2000000,
     passiveIncome: 1000000,
-    requiredReputation: 1000000,
-    costToPromote: 500000000000,
+    requiredReputation: 500000,
+    costToPromote: 100000000000,
     isManager: true,
     reqBusinessStage: BusinessStage.NETWORK,
     reqPropertyId: 'prop_island',
@@ -170,10 +170,10 @@ export const CAREER_LADDER: JobPosition[] = [
 
 export const OFFICE_CAPACITY = [
   { level: 1, name: 'Квартира', maxWorkers: 5, cost: 0 },
-  { level: 2, name: 'Коворкинг', maxWorkers: 20, cost: 1000000 }, 
-  { level: 3, name: 'Офис B-класс', maxWorkers: 60, cost: 50000000 }, 
-  { level: 4, name: 'Офис A-класс', maxWorkers: 200, cost: 1000000000 }, 
-  { level: 5, name: 'Небоскреб', maxWorkers: 2000, cost: 50000000000 }, 
+  { level: 2, name: 'Коворкинг', maxWorkers: 20, cost: 500000 }, 
+  { level: 3, name: 'Офис B-класс', maxWorkers: 60, cost: 10000000 }, 
+  { level: 4, name: 'Офис A-класс', maxWorkers: 200, cost: 500000000 }, 
+  { level: 5, name: 'Небоскреб', maxWorkers: 2000, cost: 20000000000 }, 
 ];
 
 export const TEAM_STRATEGIES = {
@@ -183,38 +183,38 @@ export const TEAM_STRATEGIES = {
 };
 
 export const LAUNDERING_ITEMS: LaunderingItem[] = [
-  { id: 'laund_fop', name: 'ФОП 3-группа', baseCost: 1000, baseLimit: 100000, baseIncome: 5, description: '+100к Лимит', reqBusinessStage: BusinessStage.NONE, icon: '📄' },
-  { id: 'laund_crypto', name: 'P2P Обменник', baseCost: 50000, baseLimit: 2000000, baseIncome: 50, description: '+2М Лимит', reqBusinessStage: BusinessStage.NONE, icon: '💻' },
-  { id: 'laund_shawarma', name: 'Шаурма-сеть', baseCost: 1000000, baseLimit: 50000000, baseIncome: 1000, description: '+50М Лимит', reqBusinessStage: BusinessStage.REMOTE_TEAM, icon: '🌯' },
-  { id: 'laund_carwash', name: 'Мойка самообслуживания', baseCost: 25000000, baseLimit: 1000000000, baseIncome: 15000, description: '+1Млрд Лимит', reqBusinessStage: BusinessStage.OFFICE, icon: '🚗' },
-  { id: 'laund_rest', name: 'Ресторанный Холдинг', baseCost: 500000000, baseLimit: 25000000000, baseIncome: 250000, description: '+25Млрд Лимит', reqBusinessStage: BusinessStage.OFFICE, icon: '🍝' },
-  { id: 'laund_const', name: 'Девелоперская компания', baseCost: 10000000000, baseLimit: 10000000000000, baseIncome: 5000000, description: '+10Трлн Лимит', reqBusinessStage: BusinessStage.NETWORK, icon: '🏗️' },
+  { id: 'laund_fop', name: 'ФОП 3-группа', baseCost: 500, baseLimit: 100000, baseIncome: 5, description: '+100к Лимит', reqBusinessStage: BusinessStage.NONE, icon: '📄' },
+  { id: 'laund_crypto', name: 'P2P Обменник', baseCost: 10000, baseLimit: 2000000, baseIncome: 50, description: '+2М Лимит', reqBusinessStage: BusinessStage.NONE, icon: '💻' },
+  { id: 'laund_shawarma', name: 'Шаурма-сеть', baseCost: 250000, baseLimit: 50000000, baseIncome: 1000, description: '+50М Лимит', reqBusinessStage: BusinessStage.REMOTE_TEAM, icon: '🌯' },
+  { id: 'laund_carwash', name: 'Мойка самообслуживания', baseCost: 5000000, baseLimit: 1000000000, baseIncome: 15000, description: '+1Млрд Лимит', reqBusinessStage: BusinessStage.OFFICE, icon: '🚗' },
+  { id: 'laund_rest', name: 'Ресторанный Холдинг', baseCost: 100000000, baseLimit: 25000000000, baseIncome: 250000, description: '+25Млрд Лимит', reqBusinessStage: BusinessStage.OFFICE, icon: '🍝' },
+  { id: 'laund_const', name: 'Девелоперская компания', baseCost: 2000000000, baseLimit: 10000000000000, baseIncome: 5000000, description: '+10Трлн Лимит', reqBusinessStage: BusinessStage.NETWORK, icon: '🏗️' },
 ];
 
 export const PROPERTIES: PropertyItem[] = [
   { id: 'prop_coffee', name: 'Кофе', baseCost: 100, reputationBonus: 1, description: '+1 Реп', image: '☕' },
-  { id: 'prop_iphone', name: 'Айфон 15 Pro', baseCost: 3000, reputationBonus: 20, description: '+20 Реп', image: '📱' },
-  { id: 'prop_macbook', name: 'MacBook M3 Max', baseCost: 12000, reputationBonus: 100, description: '+100 Реп', image: '💻' },
-  { id: 'prop_rolex', name: 'Rolex Daytona', baseCost: 150000, reputationBonus: 500, description: '+500 Реп', image: '⌚' },
-  { id: 'prop_tesla', name: 'Tesla Plaid', baseCost: 600000, reputationBonus: 2000, description: '+2K Реп', image: '🚗' },
-  { id: 'prop_apt', name: 'Пентхаус в Дубае', baseCost: 25000000, reputationBonus: 15000, description: '+15K Реп', image: '🏢' },
-  { id: 'prop_yacht', name: 'Яхта 50м', baseCost: 500000000, reputationBonus: 100000, description: '+100K Реп', image: '🛥️' },
-  { id: 'prop_island', name: 'Личный Остров', baseCost: 25000000000, reputationBonus: 2000000, description: '+2М Реп', image: '🏝️' },
+  { id: 'prop_iphone', name: 'Айфон 15 Pro', baseCost: 2000, reputationBonus: 20, description: '+20 Реп', image: '📱' },
+  { id: 'prop_macbook', name: 'MacBook M3 Max', baseCost: 8000, reputationBonus: 100, description: '+100 Реп', image: '💻' },
+  { id: 'prop_rolex', name: 'Rolex Daytona', baseCost: 50000, reputationBonus: 500, description: '+500 Реп', image: '⌚' },
+  { id: 'prop_tesla', name: 'Tesla Plaid', baseCost: 250000, reputationBonus: 2000, description: '+2K Реп', image: '🚗' },
+  { id: 'prop_apt', name: 'Пентхаус в Дубае', baseCost: 5000000, reputationBonus: 15000, description: '+15K Реп', image: '🏢' },
+  { id: 'prop_yacht', name: 'Яхта 50м', baseCost: 50000000, reputationBonus: 100000, description: '+100K Реп', image: '🛥️' },
+  { id: 'prop_island', name: 'Личный Остров', baseCost: 1000000000, reputationBonus: 2000000, description: '+2М Реп', image: '🏝️' },
 ];
 
 export const MARKET_ITEMS: UpgradeItem[] = [
   { id: 'tool_vpn', name: 'Приватный VPN', type: UpgradeType.RENTAL, vertical: VerticalType.TRAFFIC, baseCost: 100, baseProfit: 10, level: 0, description: '+10 Тап' },
-  { id: 'tool_spam_soft', name: 'AI Спамер', type: UpgradeType.RENTAL, vertical: VerticalType.DATING, baseCost: 15000, baseProfit: 150, level: 0, description: '+150 Тап' },
-  { id: 'soft_dating', name: 'Дейтинг Бот', type: UpgradeType.SOFTWARE, vertical: VerticalType.DATING, baseCost: 5000, baseProfit: 15, level: 0, description: 'Базовый софт.', tierNames: ['Бот v1', 'Сайт v2', 'Платформа'] },
-  { id: 'soft_drainer', name: 'Crypto Drainer', type: UpgradeType.SOFTWARE, vertical: VerticalType.TRADE, baseCost: 2000000, baseProfit: 5000, level: 0, description: 'Выкачка кошельков.', tierNames: ['Скрипт', 'Обфускатор', 'Смарт-контракт'] },
-  { id: 'soft_stealer', name: 'RedLine Stealer', type: UpgradeType.SOFTWARE, vertical: VerticalType.TRADE, baseCost: 250000000, baseProfit: 250000, level: 0, description: 'Сбор логов.', tierNames: ['Билд', 'Панель', 'Серверная часть'] },
-  { id: 'traf_channels', name: 'Сетка Каналов', type: UpgradeType.TRAFFIC, vertical: VerticalType.TRAFFIC, baseCost: 1000000, baseProfit: 0.1, level: 0, description: '+10% Доход' },
-  { id: 'traf_influencers', name: 'Биржа Блогеров', type: UpgradeType.TRAFFIC, vertical: VerticalType.TRAFFIC, baseCost: 1000000000, baseProfit: 1.0, level: 0, description: '+100% Доход' },
-  { id: 'sec_fsb', name: 'Связи в Управлении', type: UpgradeType.SECURITY, vertical: VerticalType.SECURITY, baseCost: 50000, baseProfit: 5, level: 0, description: '-5 Риска' },
-  { id: 'sec_lawyer', name: 'Звездный Адвокат', type: UpgradeType.SECURITY, vertical: VerticalType.SECURITY, baseCost: 5000000, baseProfit: 20, level: 0, description: '-20 Риска' },
-  { id: 'sec_cyber', name: 'Кибер-безопасность', type: UpgradeType.SECURITY, vertical: VerticalType.SECURITY, baseCost: 250000000, baseProfit: 100, level: 0, description: '-100 Риска' },
-  { id: 'dark_courier', name: 'Сеть курьеров', type: UpgradeType.BLACK_MARKET, vertical: VerticalType.DARK, baseCost: 50000, baseProfit: 250, level: 0, description: '+250/сек' },
-  { id: 'dark_guns', name: 'Оружейный хаб', type: UpgradeType.BLACK_MARKET, vertical: VerticalType.DARK, baseCost: 50000000, baseProfit: 50000, level: 0, description: '+50K/сек' },
+  { id: 'tool_spam_soft', name: 'AI Спамер', type: UpgradeType.RENTAL, vertical: VerticalType.DATING, baseCost: 5000, baseProfit: 150, level: 0, description: '+150 Тап' },
+  { id: 'soft_dating', name: 'Дейтинг Бот', type: UpgradeType.SOFTWARE, vertical: VerticalType.DATING, baseCost: 2500, baseProfit: 15, level: 0, description: 'Базовый софт.', tierNames: ['Бот v1', 'Сайт v2', 'Платформа'] },
+  { id: 'soft_drainer', name: 'Crypto Drainer', type: UpgradeType.SOFTWARE, vertical: VerticalType.TRADE, baseCost: 500000, baseProfit: 5000, level: 0, description: 'Выкачка кошельков.', tierNames: ['Скрипт', 'Обфускатор', 'Смарт-контракт'] },
+  { id: 'soft_stealer', name: 'RedLine Stealer', type: UpgradeType.SOFTWARE, vertical: VerticalType.TRADE, baseCost: 10000000, baseProfit: 250000, level: 0, description: 'Сбор логов.', tierNames: ['Билд', 'Панель', 'Серверная часть'] },
+  { id: 'traf_channels', name: 'Сетка Каналов', type: UpgradeType.TRAFFIC, vertical: VerticalType.TRAFFIC, baseCost: 100000, baseProfit: 0.1, level: 0, description: '+10% Доход' },
+  { id: 'traf_influencers', name: 'Биржа Блогеров', type: UpgradeType.TRAFFIC, vertical: VerticalType.TRAFFIC, baseCost: 5000000, baseProfit: 1.0, level: 0, description: '+100% Доход' },
+  { id: 'sec_fsb', name: 'Связи в Управлении', type: UpgradeType.SECURITY, vertical: VerticalType.SECURITY, baseCost: 5000, baseProfit: 5, level: 0, description: '-5 Риска' },
+  { id: 'sec_lawyer', name: 'Звездный Адвокат', type: UpgradeType.SECURITY, vertical: VerticalType.SECURITY, baseCost: 1000000, baseProfit: 20, level: 0, description: '-20 Риска' },
+  { id: 'sec_cyber', name: 'Кибер-безопасность', type: UpgradeType.SECURITY, vertical: VerticalType.SECURITY, baseCost: 50000000, baseProfit: 100, level: 0, description: '-100 Риска' },
+  { id: 'dark_courier', name: 'Сеть курьеров', type: UpgradeType.BLACK_MARKET, vertical: VerticalType.DARK, baseCost: 10000, baseProfit: 250, level: 0, description: '+250/сек' },
+  { id: 'dark_guns', name: 'Оружейный хаб', type: UpgradeType.BLACK_MARKET, vertical: VerticalType.DARK, baseCost: 10000000, baseProfit: 50000, level: 0, description: '+50K/сек' },
 ];
 
 export const ASSETS: AssetItem[] = [
@@ -226,8 +226,8 @@ export const ASSETS: AssetItem[] = [
 ];
 
 export const SCHEMES_LIST: SchemeItem[] = [
-  { id: 'grey_refund', name: 'Amazon Refund', description: 'Заказ товара с последующим возвратом средств.', category: SchemeCategory.GREY, cost: 500, durationSeconds: 600, riskPercentage: 10, minProfit: 800, maxProfit: 1500, icon: '📦' },
-  { id: 'grey_airdrop', name: 'Crypto Airdrop', description: 'Фарминг бесплатных токенов через мультиаккаунты.', category: SchemeCategory.GREY, cost: 5000, durationSeconds: 1800, riskPercentage: 5, minProfit: 7000, maxProfit: 12000, icon: '🪂' },
-  { id: 'black_goods', name: 'Закуп Стаффа', description: 'Покупка запрещенки для перепродажи.', category: SchemeCategory.BLACK, cost: 10000, durationSeconds: 3600, riskPercentage: 35, minProfit: 25000, maxProfit: 45000, icon: '💊' },
-  { id: 'black_carding', name: 'Кардинг', description: 'Вбив чужих карт в шопы.', category: SchemeCategory.BLACK, cost: 50000, durationSeconds: 7200, riskPercentage: 50, minProfit: 150000, maxProfit: 300000, icon: '💳' },
+  { id: 'grey_refund', name: 'Amazon Refund', description: 'Заказ товара с последующим возвратом средств.', category: SchemeCategory.GREY, cost: 300, durationSeconds: 60, riskPercentage: 10, minProfit: 800, maxProfit: 1500, icon: '📦' },
+  { id: 'grey_airdrop', name: 'Crypto Airdrop', description: 'Фарминг бесплатных токенов через мультиаккаунты.', category: SchemeCategory.GREY, cost: 2000, durationSeconds: 180, riskPercentage: 5, minProfit: 7000, maxProfit: 12000, icon: '🪂' },
+  { id: 'black_goods', name: 'Закуп Стаффа', description: 'Покупка запрещенки для перепродажи.', category: SchemeCategory.BLACK, cost: 10000, durationSeconds: 300, riskPercentage: 35, minProfit: 25000, maxProfit: 45000, icon: '💊' },
+  { id: 'black_carding', name: 'Кардинг', description: 'Вбив чужих карт в шопы.', category: SchemeCategory.BLACK, cost: 50000, durationSeconds: 600, riskPercentage: 50, minProfit: 150000, maxProfit: 300000, icon: '💳' },
 ];

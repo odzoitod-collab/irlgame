@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { GameState, LaunderingItem, UpgradeItem, AssetItem, PropertyItem, UpgradeType, VerticalType, DropItem } from '../../types';
+import { GameState, LaunderingItem, UpgradeItem, AssetItem, PropertyItem, UpgradeType, VerticalType, DropItem, OwnedDrop } from '../../types';
 import { LAUNDERING_ITEMS, MARKET_ITEMS, ASSETS, PROPERTIES, DROPS } from '../../constants';
 import { formatMoney, calculateUpgradeCost } from '../../utils/format';
 import { Siren, Shield, Lock, Briefcase, Globe, Monitor, Smartphone, Cpu, Zap, Award, Target, Users, Gamepad2, Activity, Heart, AlertCircle, Skull } from 'lucide-react';
@@ -43,7 +43,8 @@ export const AssetsTab: React.FC<AssetsTabProps> = ({
             </button>
             <button onClick={() => setFinanceTab('DROPS')} className={`relative flex-shrink-0 px-3 py-3 rounded-xl text-[10px] font-black tracking-wider transition-all whitespace-nowrap ${financeTab === 'DROPS' ? 'bg-primary text-white shadow-md' : 'text-slate-400 hover:text-white'}`}>
                 ДРОПЫ
-                {Object.values(gameState.ownedDrops).some(d => d.fear > 70) && <span className="absolute top-1 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse"/>}
+                {/* Fixed type error: cast d to OwnedDrop to access fear property */}
+                {Object.values(gameState.ownedDrops).some(d => (d as OwnedDrop).fear > 70) && <span className="absolute top-1 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse"/>}
             </button>
             <button onClick={() => setFinanceTab('LUXURY')} className={`flex-shrink-0 px-3 py-3 rounded-xl text-[10px] font-black tracking-wider transition-all whitespace-nowrap ${financeTab === 'LUXURY' ? 'bg-primary text-white shadow-md' : 'text-slate-400 hover:text-white'}`}>
                 ЛАКШЕРИ
@@ -62,7 +63,7 @@ export const AssetsTab: React.FC<AssetsTabProps> = ({
                     <AlertCircle className="text-orange-500 flex-shrink-0" />
                     <p className="text-[10px] text-orange-200 font-bold uppercase leading-tight">
                         Дропы расширяют ваш лимит банка, но со временем они начинают бояться. 
-                        Если "Страх" {'>'} 90%, дроп может кинуть вас. Выплачивайте премии, чтобы успокоить их.
+                        Если "Страх" > 90%, дроп может кинуть вас. Выплачивайте премии, чтобы успокоить их.
                     </p>
                 </div>
 
