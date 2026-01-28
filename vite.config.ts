@@ -6,7 +6,6 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false,
-    minify: 'terser',
     rollupOptions: {
       output: {
         manualChunks: {
@@ -21,7 +20,7 @@ export default defineConfig({
     host: true
   },
   preview: {
-    port: process.env.PORT ? parseInt(process.env.PORT) : 4173,
+    port: parseInt(process.env.PORT || '4173'),
     host: true
   }
 });

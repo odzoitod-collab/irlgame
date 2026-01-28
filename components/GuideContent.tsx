@@ -28,7 +28,7 @@ export const GuideContent: React.FC = () => {
           <p className="text-xs">В начале ты никто. Твой доход — только клики.</p>
           <ul className="list-disc list-inside space-y-2 text-xs text-slate-400">
             <li><strong className="text-white">Цель:</strong> Получить должность "Воркер".</li>
-            <li><strong className="text-white">Что купить:</strong> Зайди в "Активы" -> "Инструменты" и купи <strong>VPN</strong>. Без него воркать нельзя.</li>
+            <li><strong className="text-white">Что купить:</strong> Зайди в "Активы" → "Инструменты" и купи <strong>VPN</strong>. Без него воркать нельзя.</li>
             <li><strong className="text-white">Далее:</strong> Копи на <strong>iPhone</strong> (вкладка "Лакшери"). Это требование для следующего повышения.</li>
           </ul>
         </div>

@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { GameState, JobPosition, BusinessStage } from '../../types';
 import { CAREER_LADDER, MARKET_ITEMS, PROPERTIES, CHARACTER_STAGES, SKILLS } from '../../constants';
 import { formatMoney } from '../../utils/format';
-import { HelpCircle, BriefcaseBusiness, Award, CheckCircle2, Lock, Timer, Zap, Sparkles } from 'lucide-react';
+import { HelpCircle, Briefcase, Award, CheckCircle2, Lock, Timer, Zap, Sparkles } from 'lucide-react';
 
 interface ProfileTabProps {
   gameState: GameState;
