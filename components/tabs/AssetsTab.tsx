@@ -63,7 +63,7 @@ export const AssetsTab: React.FC<AssetsTabProps> = ({
                     <AlertCircle className="text-orange-500 flex-shrink-0" />
                     <p className="text-[10px] text-orange-200 font-bold uppercase leading-tight">
                         Дропы расширяют ваш лимит банка, но со временем они начинают бояться. 
-                        Если "Страх" > 90%, дроп может кинуть вас. Выплачивайте премии, чтобы успокоить их.
+                        Если &quot;Страх&quot; {'>'} 90%, дроп может кинуть вас. Выплачивайте премии, чтобы успокоить их.
                     </p>
                 </div>
 
