@@ -44,7 +44,15 @@ View your app in AI Studio: https://ai.studio/apps/drive/1cstap79kmNkB5E64ptsWpz
 1. Подключите репозиторий к Render
 2. Выберите "Static Site"
 3. Установите переменную окружения `GEMINI_API_KEY`
-4. Используется конфигурация из `render.yaml`
+4. **Root Directory**: Оставьте пустым (приложение в корне) или укажите путь к подпапке
+5. Используется конфигурация из `render.yaml`
+
+**Настройка Root Directory:**
+- Если приложение в корне репозитория - оставьте поле пустым
+- Если в подпапке (например, `frontend/`) - укажите `frontend`
+- Для монорепо - укажите путь к конкретному приложению
+
+См. примеры в `render-examples.yaml`
 
 ### Netlify
 
