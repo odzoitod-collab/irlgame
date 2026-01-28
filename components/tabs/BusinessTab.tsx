@@ -14,7 +14,7 @@ interface BusinessTabProps {
 }
 
 export const BusinessTab: React.FC<BusinessTabProps> = ({ gameState, setGameState, buyUpgrade, hasSoftware, scamIncome }) => {
-  const [businessTab, setBusinessTab] = useState<'TEAM' | 'SOFT' | 'TRAFFIC'>('TEAM');
+  const [businessTab, setBusinessTab] = useState<'TEAM' | 'SOFT' | 'TRAFFIC' | 'CONSUMABLES'>('TEAM');
 
   const currentOfficeSpace = OFFICE_CAPACITY.find(o => o.level === gameState.officeLevel) || OFFICE_CAPACITY[0];
   const currentJobIndex = CAREER_LADDER.findIndex(j => j.id === gameState.currentJobId);
@@ -52,6 +52,9 @@ export const BusinessTab: React.FC<BusinessTabProps> = ({ gameState, setGameStat
             <button onClick={() => setBusinessTab('SOFT')} className={`relative flex-1 py-3 rounded-xl text-[10px] font-black tracking-wider transition-all ${businessTab === 'SOFT' ? 'bg-primary text-white shadow-md' : 'text-slate-400 hover:text-white'}`}>
                 СОФТ
                 {!hasSoftware && gameState.workers > 0 && <span className="absolute top-1 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse"/>}
+            </button>
+            <button onClick={() => setBusinessTab('CONSUMABLES')} className={`relative flex-1 py-3 rounded-xl text-[10px] font-black tracking-wider transition-all ${businessTab === 'CONSUMABLES' ? 'bg-primary text-white shadow-md' : 'text-slate-400 hover:text-white'}`}>
+                РАСХОДНИКИ
             </button>
             <button onClick={() => setBusinessTab('TRAFFIC')} className={`relative flex-1 py-3 rounded-xl text-[10px] font-black tracking-wider transition-all ${businessTab === 'TRAFFIC' ? 'bg-primary text-white shadow-md' : 'text-slate-400 hover:text-white'}`}>
                 ТРАФИК
@@ -130,12 +133,31 @@ export const BusinessTab: React.FC<BusinessTabProps> = ({ gameState, setGameStat
                             ))}
                         </div>
 
-                        <button onClick={() => setGameState(prev => ({ ...prev, balance: prev.balance - calculateUpgradeCost(WORKER_HIRE_COST_BASE, gameState.workers), workers: prev.workers + 1 }))} 
-                            disabled={gameState.workers >= currentOfficeSpace.maxWorkers * gameState.officeBranches || gameState.balance < calculateUpgradeCost(WORKER_HIRE_COST_BASE, gameState.workers)}
-                            className="w-full py-4 bg-accent text-white font-black rounded-2xl hover:brightness-110 disabled:opacity-50 disabled:bg-surfaceHighlight disabled:text-slate-500 transition-all active:scale-95 shadow-lg shadow-accent/20 flex flex-col items-center leading-none gap-1">
-                            <span>НАНЯТЬ ВОРКЕРА</span>
-                            <span className="text-[10px] opacity-80 font-mono font-medium">{formatMoney(calculateUpgradeCost(WORKER_HIRE_COST_BASE, gameState.workers))}</span>
-                        </button>
+                        <div className="grid grid-cols-2 gap-3 mt-4">
+                            <button onClick={() => setGameState(prev => ({ ...prev, balance: prev.balance - calculateUpgradeCost(WORKER_HIRE_COST_BASE, gameState.workers), workers: prev.workers + 1 }))} 
+                                disabled={gameState.workers >= currentOfficeSpace.maxWorkers * gameState.officeBranches || gameState.balance < calculateUpgradeCost(WORKER_HIRE_COST_BASE, gameState.workers)}
+                                className="py-4 bg-accent text-white font-black rounded-2xl hover:brightness-110 disabled:opacity-50 disabled:bg-surfaceHighlight disabled:text-slate-500 transition-all active:scale-95 shadow-lg shadow-accent/20 flex flex-col items-center leading-none gap-1">
+                                <span>ВОРКЕР</span>
+                                <span className="text-[10px] opacity-80 font-mono font-medium">{formatMoney(calculateUpgradeCost(WORKER_HIRE_COST_BASE, gameState.workers))}</span>
+                            </button>
+                            
+                            <button onClick={() => {
+                                const teamLeaderCost = calculateUpgradeCost(WORKER_HIRE_COST_BASE * 10, gameState.upgrades['team_leader'] || 0);
+                                if (gameState.balance >= teamLeaderCost) {
+                                    setGameState(prev => ({ 
+                                        ...prev, 
+                                        balance: prev.balance - teamLeaderCost,
+                                        upgrades: { ...prev.upgrades, team_leader: (prev.upgrades['team_leader'] || 0) + 1 },
+                                        workers: prev.workers + 5
+                                    }));
+                                }
+                            }} 
+                                disabled={(gameState.workers + 5) > currentOfficeSpace.maxWorkers * gameState.officeBranches || gameState.balance < calculateUpgradeCost(WORKER_HIRE_COST_BASE * 10, gameState.upgrades['team_leader'] || 0)}
+                                className="py-4 bg-purple-600 text-white font-black rounded-2xl hover:brightness-110 disabled:opacity-50 disabled:bg-surfaceHighlight disabled:text-slate-500 transition-all active:scale-95 shadow-lg shadow-purple-600/20 flex flex-col items-center leading-none gap-1">
+                                <span>ТЕАМЛИД</span>
+                                <span className="text-[10px] opacity-80 font-mono font-medium">{formatMoney(calculateUpgradeCost(WORKER_HIRE_COST_BASE * 10, gameState.upgrades['team_leader'] || 0))}</span>
+                            </button>
+                        </div>
                     </div>
                 )}
             </div>
@@ -195,6 +217,98 @@ export const BusinessTab: React.FC<BusinessTabProps> = ({ gameState, setGameStat
                         </div>
                     );
                 })}
+             </div>
+        )}
+
+        {businessTab === 'CONSUMABLES' && (
+             <div className="space-y-4">
+                 <div className="p-4 bg-primary/10 rounded-2xl text-xs text-primary font-bold border border-primary/20 mb-2">
+                     🛡️ Расходники необходимы для безопасной работы. VPN и Proxy защищают твою команду.
+                 </div>
+                 
+                 {/* VPN Section */}
+                 <div className="bg-surface p-4 rounded-3xl border border-white/5">
+                     <h3 className="text-white font-black text-sm uppercase mb-3 flex items-center gap-2">
+                         <Globe size={18} className="text-blue-500" /> VPN & Прокси
+                     </h3>
+                     
+                     {MARKET_ITEMS.filter(u => u.type === UpgradeType.RENTAL).map(u => {
+                        const level = gameState.upgrades[u.id] || 0;
+                        const cost = calculateUpgradeCost(u.baseCost, level);
+                        const canBuy = gameState.balance >= cost;
+                        return (
+                            <div key={u.id} className="bg-surfaceHighlight p-4 rounded-2xl mb-3 last:mb-0">
+                                <div className="flex justify-between items-start mb-2">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-surface text-blue-500 rounded-xl">{getMarketIcon(u.id)}</div>
+                                        <div>
+                                            <div className="text-white font-black text-sm">{u.name}</div>
+                                            <div className="text-[10px] text-slate-400 font-bold mt-1">{u.description}</div>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <div className="text-xs font-bold text-blue-500">Уровень {level}</div>
+                                        <div className="text-[10px] text-slate-400">+{u.baseProfit * level} Тап</div>
+                                    </div>
+                                </div>
+                                <button onClick={() => buyUpgrade(u)} disabled={!canBuy} className={`w-full py-2.5 rounded-xl text-xs font-black uppercase tracking-widest active:scale-95 transition-transform ${canBuy ? 'bg-blue-600 text-white' : 'bg-surface text-slate-500'}`}>
+                                    {level === 0 ? 'КУПИТЬ' : 'УЛУЧШИТЬ'} {formatMoney(cost)}
+                                </button>
+                            </div>
+                        );
+                    })}
+                 </div>
+                 
+                 {/* Premium Tools */}
+                 <div className="bg-surface p-4 rounded-3xl border border-white/5">
+                     <h3 className="text-white font-black text-sm uppercase mb-3 flex items-center gap-2">
+                         <Zap size={18} className="text-yellow-500" /> Премиум Инструменты
+                     </h3>
+                     
+                     {[
+                         { id: 'tool_proxy_premium', name: 'Премиум Прокси', cost: 50000, description: 'Элитные прокси для высоких нагрузок', tapBonus: 500 },
+                         { id: 'tool_vpn_corporate', name: 'Корпоративный VPN', cost: 200000, description: 'VPN для всей команды', tapBonus: 2000 },
+                         { id: 'tool_obfuscator', name: 'Обфускатор Трафика', cost: 500000, description: 'Маскировка трафика под легальный', tapBonus: 5000 }
+                     ].map(tool => {
+                        const owned = (gameState.upgrades[tool.id] || 0) > 0;
+                        const canBuy = gameState.balance >= tool.cost;
+                        return (
+                            <div key={tool.id} className="bg-surfaceHighlight p-4 rounded-2xl mb-3 last:mb-0">
+                                <div className="flex justify-between items-start mb-2">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-surface text-yellow-500 rounded-xl">
+                                            {tool.id.includes('proxy') ? <Globe size={16} /> : 
+                                             tool.id.includes('vpn') ? <Lock size={16} /> : 
+                                             <Cpu size={16} />}
+                                        </div>
+                                        <div>
+                                            <div className="text-white font-black text-sm">{tool.name}</div>
+                                            <div className="text-[10px] text-slate-400 font-bold mt-1">{tool.description}</div>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <div className="text-xs font-bold text-yellow-500">{owned ? 'Куплено' : 'Не куплено'}</div>
+                                        <div className="text-[10px] text-slate-400">+{tool.tapBonus} Тап</div>
+                                    </div>
+                                </div>
+                                <button 
+                                    onClick={() => {
+                                        if (canBuy && !owned) {
+                                            setGameState(prev => ({
+                                                ...prev,
+                                                balance: prev.balance - tool.cost,
+                                                upgrades: { ...prev.upgrades, [tool.id]: 1 }
+                                            }));
+                                        }
+                                    }} 
+                                    disabled={!canBuy || owned}
+                                    className={`w-full py-2.5 rounded-xl text-xs font-black uppercase tracking-widest active:scale-95 transition-transform ${canBuy && !owned ? 'bg-yellow-600 text-white' : 'bg-surface text-slate-500'}`}>
+                                    {owned ? 'КУПЛЕНО' : `КУПИТЬ ${formatMoney(tool.cost)}`}
+                                </button>
+                            </div>
+                        );
+                    })}
+                 </div>
              </div>
         )}
       </div>
