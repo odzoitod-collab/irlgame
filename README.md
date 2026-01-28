@@ -2,19 +2,82 @@
 <img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 </div>
 
-# Run and deploy your AI Studio app
+# Scam Tycoon Empire
 
-This contains everything you need to run your app locally.
+React + TypeScript приложение, готовое к деплою на различных платформах.
 
 View your app in AI Studio: https://ai.studio/apps/drive/1cstap79kmNkB5E64ptsWpzyl5-iB_nI7
 
-## Run Locally
+## 🚀 Быстрый старт
 
-**Prerequisites:**  Node.js
+**Требования:** Node.js 18+
 
+1. Установите зависимости:
+   ```bash
+   npm install
+   ```
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+2. Скопируйте переменные окружения:
+   ```bash
+   cp .env.example .env.local
+   ```
+
+3. Установите ваш Gemini API ключ в `.env.local`
+
+4. Запустите приложение:
+   ```bash
+   npm run dev
+   ```
+
+## 📦 Деплой
+
+### Vercel (Рекомендуется)
+
+1. Подключите репозиторий к Vercel
+2. Установите переменную окружения `GEMINI_API_KEY`
+3. Деплой произойдет автоматически
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new)
+
+### Render
+
+1. Подключите репозиторий к Render
+2. Выберите "Static Site"
+3. Установите переменную окружения `GEMINI_API_KEY`
+4. Используется конфигурация из `render.yaml`
+
+### Netlify
+
+1. Подключите репозиторий к Netlify
+2. Установите переменную окружения `GEMINI_API_KEY`
+3. Используется конфигурация из `netlify.toml`
+
+### Docker
+
+```bash
+# Сборка образа
+docker build -t scam-tycoon-empire .
+
+# Запуск контейнера
+docker run -p 80:80 scam-tycoon-empire
+```
+
+## 🛠 Скрипты
+
+- `npm run dev` - Запуск в режиме разработки
+- `npm run build` - Сборка для продакшена
+- `npm run preview` - Предпросмотр собранного приложения
+
+## 🔧 Конфигурация
+
+Проект включает конфигурационные файлы для:
+- ✅ Vercel (`vercel.json`)
+- ✅ Render (`render.yaml`)
+- ✅ Netlify (`netlify.toml`)
+- ✅ Docker (`Dockerfile`, `nginx.conf`)
+
+## 📝 Переменные окружения
+
+| Переменная | Описание | Обязательная |
+|------------|----------|--------------|
+| `GEMINI_API_KEY` | API ключ для Gemini | Да |
