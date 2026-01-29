@@ -201,10 +201,10 @@ export const LAUNDERING_ITEMS: LaunderingItem[] = [
 ];
 
 export const PROPERTIES: PropertyItem[] = [
-  { id: 'prop_coffee', name: 'Кофе', baseCost: 150, reputationBonus: 1, description: '+1 Реп', image: '☕' },
-  { id: 'prop_iphone', name: 'Айфон 15 Pro', baseCost: 3500, reputationBonus: 20, description: '+20 Реп', image: '📱' },
-  { id: 'prop_macbook', name: 'MacBook M3 Max', baseCost: 14000, reputationBonus: 100, description: '+100 Реп', image: '💻' },
-  { id: 'prop_rolex', name: 'Rolex Daytona', baseCost: 90000, reputationBonus: 500, description: '+500 Реп', image: '⌚' },
+  { id: 'prop_coffee', name: 'Кофе', baseCost: 200, reputationBonus: 1, description: '+1 Реп', image: '☕' },
+  { id: 'prop_iphone', name: 'Айфон 15 Pro', baseCost: 5000, reputationBonus: 20, description: '+20 Реп', image: '📱' },
+  { id: 'prop_macbook', name: 'MacBook M3 Max', baseCost: 30000, reputationBonus: 100, description: '+100 Реп', image: '💻' },
+  { id: 'prop_rolex', name: 'Rolex Daytona', baseCost: 120000, reputationBonus: 500, description: '+500 Реп', image: '⌚' },
   { id: 'prop_tesla', name: 'Tesla Plaid', baseCost: 450000, reputationBonus: 2000, description: '+2K Реп', image: '🚗' },
   { id: 'prop_apt', name: 'Пентхаус в Дубае', baseCost: 9000000, reputationBonus: 15000, description: '+15K Реп', image: '🏢' },
   { id: 'prop_yacht', name: 'Яхта 50м', baseCost: 90000000, reputationBonus: 100000, description: '+100K Реп', image: '🛥️' },
@@ -216,19 +216,19 @@ export const MARKET_ITEMS: UpgradeItem[] = [
   { id: 'tool_vpn', name: 'Приватный VPN', type: UpgradeType.RENTAL, vertical: VerticalType.TRAFFIC, baseCost: 50, baseProfit: 5, level: 0, description: '+5 Тап' },
 
   // TRAFFIC (main source of scaling)
-  { id: 'tool_spam_soft', name: 'AI Спамер', type: UpgradeType.TRAFFIC, vertical: VerticalType.TRAFFIC, baseCost: 1000, baseProfit: 0.12, level: 0, description: '+12% Трафик/доход' },
-  { id: 'traf_channels', name: 'Сетка Каналов', type: UpgradeType.TRAFFIC, vertical: VerticalType.TRAFFIC, baseCost: 15000, baseProfit: 0.25, level: 0, description: '+25% Доход' },
-  { id: 'traf_influencers', name: 'Биржа Блогеров', type: UpgradeType.TRAFFIC, vertical: VerticalType.TRAFFIC, baseCost: 80000, baseProfit: 1.5, level: 0, description: '+150% Доход' },
+  { id: 'tool_spam_soft', name: 'AI Спамер', type: UpgradeType.TRAFFIC, vertical: VerticalType.TRAFFIC, baseCost: 8000, baseProfit: 0.12, level: 0, description: '+12% Трафик/доход' },
+  { id: 'traf_channels', name: 'Сетка Каналов', type: UpgradeType.TRAFFIC, vertical: VerticalType.TRAFFIC, baseCost: 35000, baseProfit: 0.25, level: 0, description: '+25% Доход' },
+  { id: 'traf_influencers', name: 'Биржа Блогеров', type: UpgradeType.TRAFFIC, vertical: VerticalType.TRAFFIC, baseCost: 120000, baseProfit: 1.5, level: 0, description: '+150% Доход' },
 
   // SOFTWARE (10 items: from cheap to expensive)
-  { id: 'soft_dating', name: 'Дейтинг Бот', type: UpgradeType.SOFTWARE, vertical: VerticalType.DATING, baseCost: 500, baseProfit: 15, level: 0, description: 'Базовый софт.', tierNames: ['Бот v1', 'Сайт v2', 'Платформа'] },
-  { id: 'soft_caller', name: 'Колл-скрипты', type: UpgradeType.SOFTWARE, vertical: VerticalType.DATING, baseCost: 1200, baseProfit: 60, level: 0, description: 'Скрипты + тренинг для воркеров.', tierNames: ['Скрипты', 'CRM', 'Автоворонка'] },
-  { id: 'soft_antifraud', name: 'Антифрод-обход', type: UpgradeType.SOFTWARE, vertical: VerticalType.SHOP, baseCost: 6500, baseProfit: 240, level: 0, description: 'Прокладки и обходы проверок.', tierNames: ['Прокладки', 'Фингерпринт', 'Ферма'] },
-  { id: 'soft_shop', name: 'Шоп-витрина', type: UpgradeType.SOFTWARE, vertical: VerticalType.SHOP, baseCost: 22000, baseProfit: 850, level: 0, description: 'Ленд + корзина + прием.', tierNames: ['Ленд', 'Витрина', 'Сеть'] },
-  { id: 'soft_sms', name: 'SMS/Email шлюз', type: UpgradeType.SOFTWARE, vertical: VerticalType.DATING, baseCost: 45000, baseProfit: 2800, level: 0, description: 'Массовая рассылка и доставляемость.', tierNames: ['Шлюз', 'Пулы', 'Инфраструктура'] },
+  { id: 'soft_dating', name: 'Дейтинг Бот', type: UpgradeType.SOFTWARE, vertical: VerticalType.DATING, baseCost: 1000, baseProfit: 15, level: 0, description: 'Базовый софт.', tierNames: ['Бот v1', 'Сайт v2', 'Платформа'] },
+  { id: 'soft_caller', name: 'Колл-скрипты', type: UpgradeType.SOFTWARE, vertical: VerticalType.DATING, baseCost: 3000, baseProfit: 60, level: 0, description: 'Скрипты + тренинг для воркеров.', tierNames: ['Скрипты', 'CRM', 'Автоворонка'] },
+  { id: 'soft_antifraud', name: 'Антифрод-обход', type: UpgradeType.SOFTWARE, vertical: VerticalType.SHOP, baseCost: 10000, baseProfit: 240, level: 0, description: 'Прокладки и обходы проверок.', tierNames: ['Прокладки', 'Фингерпринт', 'Ферма'] },
+  { id: 'soft_shop', name: 'Шоп-витрина', type: UpgradeType.SOFTWARE, vertical: VerticalType.SHOP, baseCost: 40000, baseProfit: 850, level: 0, description: 'Ленд + корзина + прием.', tierNames: ['Ленд', 'Витрина', 'Сеть'] },
+  { id: 'soft_sms', name: 'SMS/Email шлюз', type: UpgradeType.SOFTWARE, vertical: VerticalType.DATING, baseCost: 70000, baseProfit: 2800, level: 0, description: 'Массовая рассылка и доставляемость.', tierNames: ['Шлюз', 'Пулы', 'Инфраструктура'] },
   { id: 'soft_escrow', name: 'Фейк-эскроу', type: UpgradeType.SOFTWARE, vertical: VerticalType.TRADE, baseCost: 95000, baseProfit: 9000, level: 0, description: 'Псевдо-сервисы и доверие.', tierNames: ['Ленд', 'Кабинет', 'Экосистема'] },
-  { id: 'soft_drainer', name: 'Crypto Drainer', type: UpgradeType.SOFTWARE, vertical: VerticalType.TRADE, baseCost: 110000, baseProfit: 5000, level: 0, description: 'Выкачка кошельков.', tierNames: ['Скрипт', 'Обфускатор', 'Смарт-контракт'] },
-  { id: 'soft_stealer', name: 'RedLine Stealer', type: UpgradeType.SOFTWARE, vertical: VerticalType.TRADE, baseCost: 180000, baseProfit: 250000, level: 0, description: 'Сбор логов.', tierNames: ['Билд', 'Панель', 'Серверная часть'] },
+  { id: 'soft_drainer', name: 'Crypto Drainer', type: UpgradeType.SOFTWARE, vertical: VerticalType.TRADE, baseCost: 190000, baseProfit: 5000, level: 0, description: 'Выкачка кошельков.', tierNames: ['Скрипт', 'Обфускатор', 'Смарт-контракт'] },
+  { id: 'soft_stealer', name: 'RedLine Stealer', type: UpgradeType.SOFTWARE, vertical: VerticalType.TRADE, baseCost: 800000, baseProfit: 250000, level: 0, description: 'Сбор логов.', tierNames: ['Билд', 'Панель', 'Серверная часть'] },
   { id: 'soft_banker', name: 'Banking-троян', type: UpgradeType.SOFTWARE, vertical: VerticalType.TRADE, baseCost: 12000000, baseProfit: 1400000, level: 0, description: 'Самый грязный профит.', tierNames: ['Пейлоад', 'Сеть', 'Операция'] },
   { id: 'soft_ransom', name: 'Ransom Suite', type: UpgradeType.SOFTWARE, vertical: VerticalType.TRADE, baseCost: 900000000, baseProfit: 9000000, level: 0, description: 'Максимальный риск, максимальный выхлоп.', tierNames: ['Шифратор', 'Панель', 'Картель'] },
 
@@ -249,10 +249,10 @@ export const ASSETS: AssetItem[] = [
 ];
 
 export const SUPPLIES_ITEMS: SupplyItem[] = [
-  { id: 'sup_energy', name: 'Энергетик', description: '+XP сразу. Быстрый буст уровня.', cost: 2500, sellPrice: 1250, effectType: 'XP', effectValue: 120, icon: '🥤' },
+  { id: 'sup_energy', name: 'Энергетик', description: '+XP сразу. Быстрый буст уровня.', cost: 6000, sellPrice: 1250, effectType: 'XP', effectValue: 120, icon: '🥤' },
   { id: 'sup_status', name: 'Понты', description: '+Репутация сразу. Помогает открыть должности.', cost: 8000, sellPrice: 4000, effectType: 'REPUTATION', effectValue: 80, icon: '💎' },
-  { id: 'sup_lawyer', name: 'Консультация адвоката', description: 'Снижает розыск сразу.', cost: 15000, sellPrice: 7500, effectType: 'RISK_REDUCE', effectValue: 10, icon: '⚖️' },
-  { id: 'sup_supplies_deal', name: 'Оптовик расходников', description: 'На время удешевляет обязательные расходники.', cost: 12000, sellPrice: 6000, effectType: 'CONSUMABLES_DISCOUNT', effectValue: 0.75, durationMs: 10 * 60 * 1000, icon: '📦' },
+  { id: 'sup_lawyer', name: 'Консультация адвоката', description: 'Снижает розыск сразу.', cost: 30000, sellPrice: 7500, effectType: 'RISK_REDUCE', effectValue: 10, icon: '⚖️' },
+  { id: 'sup_supplies_deal', name: 'Оптовик расходников', description: 'На время удешевляет обязательные расходники.', cost: 20000, sellPrice: 6000, effectType: 'CONSUMABLES_DISCOUNT', effectValue: 0.75, durationMs: 10 * 60 * 1000, icon: '📦' },
 ];
 
 export const SCHEMES_LIST: SchemeItem[] = [
