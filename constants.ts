@@ -38,7 +38,7 @@ export const CAREER_LADDER: JobPosition[] = [
     id: 'job_start',
     title: 'Новичок',
     vertical: 'Мамкин хакер',
-    salaryPerClick: 5,
+    salaryPerClick: 1,
     passiveIncome: 0,
     requiredLevel: 0,
     requiredReputation: 0,
@@ -216,9 +216,9 @@ export const MARKET_ITEMS: UpgradeItem[] = [
   { id: 'tool_vpn', name: 'Приватный VPN', type: UpgradeType.RENTAL, vertical: VerticalType.TRAFFIC, baseCost: 50, baseProfit: 2, level: 0, description: '+5 Тап' },
 
   // TRAFFIC (main source of scaling)
-  { id: 'tool_spam_soft', name: 'AI Спамер', type: UpgradeType.TRAFFIC, vertical: VerticalType.TRAFFIC, baseCost: 8000, baseProfit: 0.12, level: 0, description: '+12% Трафик/доход' },
-  { id: 'traf_channels', name: 'Сетка Каналов', type: UpgradeType.TRAFFIC, vertical: VerticalType.TRAFFIC, baseCost: 35000, baseProfit: 0.25, level: 0, description: '+25% Доход' },
-  { id: 'traf_influencers', name: 'Биржа Блогеров', type: UpgradeType.TRAFFIC, vertical: VerticalType.TRAFFIC, baseCost: 120000, baseProfit: 1.5, level: 0, description: '+150% Доход' },
+  { id: 'tool_spam_soft', name: 'AI Спамер', type: UpgradeType.TRAFFIC, vertical: VerticalType.TRAFFIC, baseCost: 8000, baseProfit: 0.05, level: 0, description: '+12% Трафик/доход' },
+  { id: 'traf_channels', name: 'Сетка Каналов', type: UpgradeType.TRAFFIC, vertical: VerticalType.TRAFFIC, baseCost: 35000, baseProfit: 0.2, level: 0, description: '+25% Доход' },
+  { id: 'traf_influencers', name: 'Биржа Блогеров', type: UpgradeType.TRAFFIC, vertical: VerticalType.TRAFFIC, baseCost: 120000, baseProfit: 1, level: 0, description: '+150% Доход' },
 
   // SOFTWARE (10 items: from cheap to expensive)
   { id: 'soft_dating', name: 'Дейтинг Бот', type: UpgradeType.SOFTWARE, vertical: VerticalType.DATING, baseCost: 1000, baseProfit: 15, level: 0, description: 'Базовый софт.', tierNames: ['Бот v1', 'Сайт v2', 'Платформа'] },
@@ -233,11 +233,11 @@ export const MARKET_ITEMS: UpgradeItem[] = [
   { id: 'soft_ransom', name: 'Ransom Suite', type: UpgradeType.SOFTWARE, vertical: VerticalType.TRADE, baseCost: 900000000, baseProfit: 9000000, level: 0, description: 'Максимальный риск, максимальный выхлоп.', tierNames: ['Шифратор', 'Панель', 'Картель'] },
 
   // SECURITY (more expensive, less "free win")
-  { id: 'sec_fsb', name: 'Связи в Управлении', type: UpgradeType.SECURITY, vertical: VerticalType.SECURITY, baseCost: 10000, baseProfit: 4, level: 0, description: '-4 Риска' },
+  { id: 'sec_fsb', name: 'Связи в Управлении', type: UpgradeType.SECURITY, vertical: VerticalType.SECURITY, baseCost: 10000, baseProfit: 4, level: 0, description: '-5 Риска' },
   { id: 'sec_lawyer', name: 'Звездный Адвокат', type: UpgradeType.SECURITY, vertical: VerticalType.SECURITY, baseCost: 2000000, baseProfit: 15, level: 0, description: '-15 Риска' },
   { id: 'sec_cyber', name: 'Кибер-безопасность', type: UpgradeType.SECURITY, vertical: VerticalType.SECURITY, baseCost: 250000000, baseProfit: 60, level: 0, description: '-60 Риска' },
-  { id: 'dark_courier', name: 'Сеть курьеров', type: UpgradeType.BLACK_MARKET, vertical: VerticalType.DARK, baseCost: 10000, baseProfit: 250, level: 0, description: '+250/сек' },
-  { id: 'dark_guns', name: 'Оружейный хаб', type: UpgradeType.BLACK_MARKET, vertical: VerticalType.DARK, baseCost: 10000000, baseProfit: 50000, level: 0, description: '+50K/сек' },
+  { id: 'dark_courier', name: 'Сеть курьеров', type: UpgradeType.BLACK_MARKET, vertical: VerticalType.DARK, baseCost: 700000, baseProfit: 150, level: 6, description: '+150/сек' },
+  { id: 'dark_guns', name: 'Оружейный хаб', type: UpgradeType.BLACK_MARKET, vertical: VerticalType.DARK, baseCost: 1000000, baseProfit: 500, level: 8, description: '+500/сек' },
 ];
 
 export const ASSETS: AssetItem[] = [
@@ -256,8 +256,8 @@ export const SUPPLIES_ITEMS: SupplyItem[] = [
 ];
 
 export const SCHEMES_LIST: SchemeItem[] = [
-  { id: 'grey_refund', name: 'Amazon Refund', description: 'Заказ товара с последующим возвратом средств.', category: SchemeCategory.GREY, cost: 300, durationSeconds: 60, riskPercentage: 10, minProfit: 800, maxProfit: 1500, icon: '📦' },
-  { id: 'grey_airdrop', name: 'Crypto Airdrop', description: 'Фарминг бесплатных токенов через мультиаккаунты.', category: SchemeCategory.GREY, cost: 2000, durationSeconds: 180, riskPercentage: 5, minProfit: 7000, maxProfit: 12000, icon: '🪂' },
-  { id: 'black_goods', name: 'Закуп Стаффа', description: 'Покупка запрещенки для перепродажи. Очень опасно.', category: SchemeCategory.BLACK, cost: 25000, durationSeconds: 300, riskPercentage: 85, minProfit: 60000, maxProfit: 120000, icon: '💊' },
-  { id: 'black_carding', name: 'Кардинг', description: 'Вбив чужих карт в шопы. Максимальный риск.', category: SchemeCategory.BLACK, cost: 120000, durationSeconds: 600, riskPercentage: 95, minProfit: 250000, maxProfit: 650000, icon: '💳' },
+  { id: 'grey_refund', name: 'Amazon Refund', description: 'Заказ товара с последующим возвратом средств.', category: SchemeCategory.GREY, cost: 500, durationSeconds: 60, riskPercentage: 10, minProfit: 300, maxProfit: 1000, icon: '📦' },
+  { id: 'grey_airdrop', name: 'Crypto Airdrop', description: 'Фарминг бесплатных токенов через мультиаккаунты.', category: SchemeCategory.GREY, cost: 5000, durationSeconds: 180, riskPercentage: 5, minProfit: 2500, maxProfit: 10000, icon: '🪂' },
+  { id: 'black_goods', name: 'Закуп Стаффа', description: 'Покупка запрещенки для перепродажи. Очень опасно.', category: SchemeCategory.BLACK, cost: 250000, durationSeconds: 300, riskPercentage: 85, minProfit: 10000, maxProfit: 500000, icon: '💊' },
+  { id: 'black_carding', name: 'Кардинг', description: 'Вбив чужих карт в шопы. Максимальный риск.', category: SchemeCategory.BLACK, cost: 450000, durationSeconds: 600, riskPercentage: 95, minProfit: 250000, maxProfit: 650000, icon: '💳' },
 ];
