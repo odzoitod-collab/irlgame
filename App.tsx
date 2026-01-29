@@ -118,11 +118,12 @@ const calculateDerivedStats = (state: GameState) => {
 
     const dirtyFlow = blackMarketPassive;
     const baseRiskGeneration = dirtyFlow / 200;
-    const riskMitigation = dirtyFlow > 0 ? (cleanIncome / 120) + securityPower : 0;
+    // Security connections (связи) always reduce risk, not just when there's dirty flow
+    const riskMitigation = dirtyFlow > 0 ? (cleanIncome / 120) + securityPower : securityPower;
     const anonMitigationFactor = 1 - (skillAnonLevel * 0.05);
     const netRiskChange = dirtyFlow > 0
       ? ((baseRiskGeneration * anonMitigationFactor) - riskMitigation) / 4
-      : -0.6;
+      : -0.6 - (securityPower / 10); // Always reduce risk with connections
 
     let portfolioValue = 0;
     ASSETS.forEach(a => {
@@ -289,18 +290,33 @@ const App: React.FC = () => {
           }
 
           // High risk penalties: SMS + red mode + frequent fines
-          // - risk > 50 => one-time SMS, red tint
-          // - risk > 70 => 90% chance fine (cooldown protected)
+          // - risk > 60 => random fines 10-60% of balance
           let lastRiskSmsThreshold = prev.lastRiskSmsThreshold || 0;
           if (newRisk >= 50 && lastRiskSmsThreshold < 50) {
             lastRiskSmsThreshold = 50;
-            setSmsAlert({ title: 'SMS', message: 'Уровень розыска > 50. Тебя уже ищут. Любая ошибка — минус деньги.' });
+            setSmsAlert({ title: 'SMS', message: 'Уровень розыска > 50. Тебя уже ищут. Будь осторожен.' });
           }
-          if (newRisk >= 70 && lastRiskSmsThreshold < 70) {
-            lastRiskSmsThreshold = 70;
-            setSmsAlert({ title: 'SMS', message: 'Уровень розыска > 70. Шансы на штрафы и блоки почти гарантированы.' });
+          if (newRisk >= 60 && lastRiskSmsThreshold < 60) {
+            lastRiskSmsThreshold = 60;
+            setSmsAlert({ title: 'SMS', message: 'Уровень розыска > 60. Ожидаются штрафы 10-60% баланса!' });
           }
+          
+          // Random fines when risk > 60%
           let lastFineTime = prev.lastFineTime || 0;
+          if (newRisk > 60 && now - lastFineTime > FINE_COOLDOWN_MS) {
+            const fineChance = (newRisk - 60) / 40; // 0-100% chance based on risk over 60
+            if (Math.random() < fineChance * 0.1) { // 10% of calculated chance per second
+              const finePercentage = 10 + Math.random() * 50; // 10-60%
+              const fineAmount = Math.floor(actualBalance * (finePercentage / 100));
+              actualBalance = Math.max(0, actualBalance - fineAmount);
+              lastFineTime = now;
+              setSmsAlert({ 
+                title: 'ШТРАФ!', 
+                message: `Выписан штраф: -${formatMoney(fineAmount)} (${finePercentage.toFixed(1)}% баланса). Снизь риск через связи!` 
+              });
+            }
+          }
+          
           let trafficDebuffUntil = prev.trafficDebuffUntil || 0;
           let trafficDebuffMultiplier = prev.trafficDebuffMultiplier || 1;
           let bankLimitBlockUntil = prev.bankLimitBlockUntil || 0;
@@ -392,26 +408,19 @@ const App: React.FC = () => {
         const lvl = prev.upgrades[upgrade.id] || 0;
         const cost = calculateUpgradeCost(upgrade.baseCost, lvl);
         if (prev.balance >= cost) {
-          // Realistic "bad investment": overpay / scam / wrong vendor
-          const isExpensive = cost >= 500000;
+          // Calculate risk increase based on cost (cheaper = less risk)
+          const riskIncrease = Math.max(0.5, Math.min(5, cost / 10000)); // 0.5-5% risk based on cost
           const isBlackish = upgrade.type === UpgradeType.BLACK_MARKET || upgrade.id.includes('ransom') || upgrade.id.includes('banker');
-          // Rare, small losses tied to the purchase amount.
-          const riskFactor = Math.min(1, prev.riskLevel / 100);
-          const baseChance = isBlackish ? 0.04 : isExpensive ? 0.02 : 0.01;
-          const dumbLossChance = baseChance + riskFactor * (isBlackish ? 0.03 : 0.02);
-          const lossRate = Math.min(0.15, (isBlackish ? 0.12 : 0.1) + riskFactor * 0.03);
-          const dumbLoss = Math.random() < dumbLossChance ? Math.floor(cost * lossRate) : 0;
-          if (dumbLoss > 0) {
-            const reason = isBlackish ? 'Кинул поставщик/палёный продавец на чёрном рынке' : 'Переплатил / купил мусорный софт';
-            setSmsAlert({ title: 'SMS', message: `${reason}: -${formatMoney(dumbLoss)} (часть инвестиции).` });
-          }
-          const moved = cost + dumbLoss;
+          
+          // Black market items give big risk increase
+          const totalRiskIncrease = isBlackish ? Math.max(10, riskIncrease * 3) : riskIncrease;
+          
           return {
             ...prev,
-            balance: Math.max(0, prev.balance - cost - dumbLoss),
+            balance: Math.max(0, prev.balance - cost),
             upgrades: { ...prev.upgrades, [upgrade.id]: lvl + 1 },
-            riskLevel: Math.min(100, prev.riskLevel + (isBlackish ? 6 : 1) + (dumbLoss > 0 ? 2 : 0)),
-            moneyMovedWindow: (prev.moneyMovedWindow || 0) + moved
+            riskLevel: Math.min(100, prev.riskLevel + totalRiskIncrease),
+            moneyMovedWindow: (prev.moneyMovedWindow || 0) + cost
           };
         }
         return prev;
@@ -425,7 +434,18 @@ const App: React.FC = () => {
             const now = Date.now();
             const newActive = { id: Math.random().toString(36), schemeId: scheme.id, startTime: now, endTime: now + (scheme.durationSeconds * 1000), isReady: false };
             const isBlack = scheme.category === 'BLACK';
-            return { ...prev, balance: prev.balance - scheme.cost, trafficUnits: Math.max(0, (prev.trafficUnits || 0) - trafficCost), activeSchemes: [...prev.activeSchemes, newActive], riskLevel: Math.min(100, prev.riskLevel + (isBlack ? 4 : 1)), moneyMovedWindow: (prev.moneyMovedWindow || 0) + scheme.cost };
+            
+            // Black schemes automatically set risk to 90%, grey schemes give small risk increase
+            const newRiskLevel = isBlack ? 90 : Math.min(100, prev.riskLevel + 2);
+            
+            return { 
+              ...prev, 
+              balance: prev.balance - scheme.cost, 
+              trafficUnits: Math.max(0, (prev.trafficUnits || 0) - trafficCost), 
+              activeSchemes: [...prev.activeSchemes, newActive], 
+              riskLevel: newRiskLevel, 
+              moneyMovedWindow: (prev.moneyMovedWindow || 0) + scheme.cost 
+            };
         }
         return prev;
     });
@@ -581,16 +601,16 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className={`relative w-full h-screen flex flex-col overflow-hidden bg-background text-white ${gameState.riskLevel >= 50 ? 'outline outline-1 outline-red-500/30' : ''}`}>
+    <div className={`relative w-full h-screen flex flex-col overflow-hidden bg-background text-white ${gameState.riskLevel >= 60 ? 'outline outline-1 outline-red-500/30' : ''}`}>
       {appLoading && <LoadingScreen onFinished={() => setAppLoading(false)} />}
 
-      {gameState.riskLevel >= 50 && (
+      {gameState.riskLevel >= 60 && (
         <div className="fixed inset-0 z-[40] pointer-events-none bg-red-950/10 mix-blend-screen" />
       )}
 
       {smsAlert && (
         <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[90] w-[92%] max-w-[420px] pointer-events-auto">
-          <div className={`rounded-2xl border p-4 backdrop-blur-xl shadow-2xl ${gameState.riskLevel >= 70 ? 'bg-red-950/60 border-red-500/40' : 'bg-surface/60 border-white/10'}`}>
+          <div className={`rounded-2xl border p-4 backdrop-blur-xl shadow-2xl ${gameState.riskLevel >= 80 ? 'bg-red-950/60 border-red-500/40' : 'bg-surface/60 border-white/10'}`}>
             <div className="flex items-center justify-between gap-4">
               <div>
                 <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">{smsAlert.title}</div>

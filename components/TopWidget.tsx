@@ -17,7 +17,8 @@ export const TopWidget: React.FC<TopWidgetProps> = ({ currentJob, bankLimit, bal
   const limitPercent = Math.min(100, (balance / bankLimit) * 100);
   const isDangerZone = limitPercent > 90;
   const isRisk50 = riskLevel >= 50;
-  const isRisk70 = riskLevel >= 70;
+  const isRisk60 = riskLevel >= 60;
+  const isRisk80 = riskLevel >= 80;
 
   return (
     <div className="relative z-[60] w-full pt-2 px-2 pointer-events-none">
@@ -55,10 +56,10 @@ export const TopWidget: React.FC<TopWidgetProps> = ({ currentJob, bankLimit, bal
             </div>
 
             <div className="text-right flex flex-col">
-              <span className={`text-[7px] font-black uppercase tracking-[0.18em] leading-none mb-0.5 flex items-center justify-end gap-1 ${isRisk70 ? 'text-red-400' : isRisk50 ? 'text-orange-400' : 'text-slate-500'}`}>
+              <span className={`text-[7px] font-black uppercase tracking-[0.18em] leading-none mb-0.5 flex items-center justify-end gap-1 ${isRisk80 ? 'text-red-400' : isRisk60 ? 'text-orange-400' : isRisk50 ? 'text-yellow-400' : 'text-slate-500'}`}>
                 Розыск <ShieldAlert size={8} />
               </span>
-              <div className={`text-[10px] font-mono font-black tracking-tighter ${isRisk70 ? 'text-red-400' : isRisk50 ? 'text-orange-300' : 'text-slate-300'}`}>
+              <div className={`text-[10px] font-mono font-black tracking-tighter ${isRisk80 ? 'text-red-400' : isRisk60 ? 'text-orange-300' : isRisk50 ? 'text-yellow-300' : 'text-slate-300'}`}>
                 {Math.floor(riskLevel)}%
               </div>
             </div>
