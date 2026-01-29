@@ -242,7 +242,7 @@ export const INITIAL_STATE: GameState = {
   experience: 0,
   moneyMovedWindow: 0,
   lastPassiveIncomeSnapshot: 0,
-  trafficUnits: 0,
+  trafficUnits: 3,
   suppliesUnits: 0,
   lastTrafficTickTime: 0,
   trafficDebuffUntil: 0,

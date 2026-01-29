@@ -16,6 +16,7 @@ export const SchemesTab: React.FC<SchemesTabProps> = ({ gameState, startScheme, 
   const [schemesTab, setSchemesTab] = useState<'ACTIVE' | 'BLACK_MARKET'>('ACTIVE');
   const activeList = gameState.activeSchemes;
   const now = Date.now();
+  const trafficUnits = gameState.trafficUnits || 0;
 
   const getMarketIcon = (id: string, vertical: VerticalType) => {
      if (vertical === VerticalType.DARK) {
@@ -47,6 +48,17 @@ export const SchemesTab: React.FC<SchemesTabProps> = ({ gameState, startScheme, 
             <button onClick={() => setSchemesTab('BLACK_MARKET')} className={`relative flex-1 py-3 rounded-xl text-[10px] font-black tracking-wider transition-all ${schemesTab === 'BLACK_MARKET' ? 'bg-red-600 text-white shadow-md' : 'text-slate-400 hover:text-white'}`}>
                 ЧЕРНУХА
             </button>
+        </div>
+
+        {/* Traffic Indicator */}
+        <div className="bg-surfaceHighlight rounded-2xl p-4 mb-6 text-center">
+            <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Доступный трафик</div>
+            <div className={`text-2xl font-mono font-black ${trafficUnits >= 2 ? 'text-white' : trafficUnits >= 1 ? 'text-yellow-500' : 'text-red-500'}`}>
+                {trafficUnits.toFixed(1)} / 20
+            </div>
+            <div className="text-[9px] text-slate-500 mt-1">
+                {trafficUnits >= 2 ? 'Можно запускать любые темы' : trafficUnits >= 1 ? 'Только серые темы' : 'Нужен трафик для тем'}
+            </div>
         </div>
 
         {schemesTab === 'ACTIVE' && (

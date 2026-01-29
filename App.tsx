@@ -263,13 +263,28 @@ const App: React.FC = () => {
             }
           }
 
-          // Traffic: decays over time. If it hits 0, team income stops (handled in derived stats).
+          // Traffic: decays over time but also generates from upgrades
           let trafficUnits = prev.trafficUnits || 0;
           let lastTrafficTickTime = prev.lastTrafficTickTime || 0;
           if (lastTrafficTickTime === 0) lastTrafficTickTime = now;
           if (now - lastTrafficTickTime >= TRAFFIC_TICK_INTERVAL_MS) {
             const trafficBurn = Math.max(1, Math.ceil((totalWorkers || 0) / 10));
-            trafficUnits = Math.max(0, trafficUnits - trafficBurn);
+            
+            // Generate traffic from traffic upgrades
+            let trafficGeneration = 0;
+            MARKET_ITEMS.forEach(u => {
+              if (u.type === UpgradeType.TRAFFIC) {
+                const level = prev.upgrades[u.id] || 0;
+                if (level > 0) {
+                  // Each traffic upgrade generates different amounts of traffic units
+                  if (u.id === 'tool_spam_soft') trafficGeneration += 0.3 * level; // 0.3 units per minute per level
+                  if (u.id === 'traf_channels') trafficGeneration += 0.8 * level; // 0.8 units per minute per level  
+                  if (u.id === 'traf_influencers') trafficGeneration += 2.0 * level; // 2.0 units per minute per level
+                }
+              }
+            });
+            
+            trafficUnits = Math.max(0, Math.min(20, trafficUnits - trafficBurn + trafficGeneration)); // Cap at 20 units
             lastTrafficTickTime = now;
           }
 
