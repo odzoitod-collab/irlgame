@@ -88,7 +88,10 @@ export const SchemesTab: React.FC<SchemesTabProps> = ({ gameState, startScheme, 
                 <div className="space-y-4">
                     <h4 className="text-xs text-slate-400 font-bold uppercase tracking-widest pl-2">Доступные Темы</h4>
                     {SCHEMES_LIST.filter(s => s.category === SchemeCategory.GREY).map(scheme => {
+                            const trafficCost = 1;
                             const canAfford = gameState.balance >= scheme.cost;
+                            const hasTraffic = (gameState.trafficUnits || 0) >= trafficCost;
+                            const canStart = canAfford && hasTraffic;
                             return (
                                 <div key={scheme.id} className="p-5 rounded-3xl relative overflow-hidden group bg-surface">
                                     <div className="flex justify-between items-start mb-4 relative z-10">
@@ -119,7 +122,7 @@ export const SchemesTab: React.FC<SchemesTabProps> = ({ gameState, startScheme, 
                                         </div>
                                     </div>
 
-                                    <button onClick={() => startScheme(scheme)} disabled={!canAfford} className={`w-full py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-transform active:scale-95 ${canAfford ? 'bg-white text-black' : 'bg-surfaceHighlight text-slate-500'}`}>
+                                    <button onClick={() => startScheme(scheme)} disabled={!canStart} className={`w-full py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-transform active:scale-95 ${canStart ? 'bg-white text-black' : 'bg-surfaceHighlight text-slate-500'}`}>
                                         НАЧАТЬ ТЕМУ
                                     </button>
                                 </div>
@@ -140,7 +143,10 @@ export const SchemesTab: React.FC<SchemesTabProps> = ({ gameState, startScheme, 
                 <h4 className="text-xs text-red-500/70 font-bold uppercase tracking-widest pl-2">Товарка (Опасно)</h4>
                 <div className="space-y-4">
                     {SCHEMES_LIST.filter(s => s.category === SchemeCategory.BLACK).map(scheme => {
+                            const trafficCost = 2;
                             const canAfford = gameState.balance >= scheme.cost;
+                            const hasTraffic = (gameState.trafficUnits || 0) >= trafficCost;
+                            const canStart = canAfford && hasTraffic;
                             return (
                                 <div key={scheme.id} className="p-5 rounded-3xl relative overflow-hidden group bg-gradient-to-br from-surface to-red-950/20 border border-red-900/10">
                                     <div className="flex justify-between items-start mb-4 relative z-10">
@@ -171,7 +177,7 @@ export const SchemesTab: React.FC<SchemesTabProps> = ({ gameState, startScheme, 
                                         </div>
                                     </div>
 
-                                    <button onClick={() => startScheme(scheme)} disabled={!canAfford} className={`w-full py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-transform active:scale-95 ${canAfford ? 'bg-red-600 text-white shadow-lg shadow-red-600/20' : 'bg-surfaceHighlight text-slate-500'}`}>
+                                    <button onClick={() => startScheme(scheme)} disabled={!canStart} className={`w-full py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-transform active:scale-95 ${canStart ? 'bg-red-600 text-white shadow-lg shadow-red-600/20' : 'bg-surfaceHighlight text-slate-500'}`}>
                                         ЗАКУПИТЬ ТОВАР
                                     </button>
                                 </div>

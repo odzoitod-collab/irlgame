@@ -59,7 +59,7 @@ export const GuideContent: React.FC = () => {
         <div className="bg-surface p-5 rounded-3xl space-y-3">
           <p className="text-xs">На высоких должностях (ТС, CEO) тобой интересуются органы.</p>
           <ul className="list-disc list-inside space-y-2 text-xs text-slate-400">
-            <li><strong className="text-white">Риск (Розыск):</strong> Растет от "черных" схем и высокой должности. Если риск 100% — будет облава (потеря 30% денег).</li>
+            <li><strong className="text-white">Риск (Розыск):</strong> Растет от "черных" схем и высокой должности. На высоком риске тебя чаще штрафуют, морозят часть средств, режут трафик и временно ограничивают лимит банка.</li>
             <li><strong className="text-white">Как снизить риск:</strong> Покупай "Безопасность" (Адвокаты, Связи) во вкладке "Активы".</li>
             <li><strong className="text-white">Обмыв:</strong> Банк имеет лимит. Чтобы хранить миллионы, покупай бизнесы (Шаурма, Рестораны). Они расширяют лимит банка.</li>
           </ul>

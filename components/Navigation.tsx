@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Landmark, Briefcase, User, Zap, Wallet } from 'lucide-react';
+import { Landmark, Briefcase, User, Zap, Wallet, Package } from 'lucide-react';
 import { Tab } from '../types';
 
 interface NavigationProps {
@@ -13,6 +13,7 @@ export const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }
     { id: Tab.MANAGEMENT, icon: Briefcase, label: 'ТИМА' }, // Team, Soft, Traffic
     { id: Tab.SCHEMES, icon: Zap, label: 'ТЕМКИ' }, // Schemes, Work
     { id: Tab.MARKET, icon: Wallet, label: 'АКТИВЫ' }, // Finance, Luxury, Exchange
+    { id: 'SUPPLIES' as Tab, icon: Package, label: 'ЛАВКА' }, // Consumables shop
     { id: Tab.PROFILE, icon: User, label: 'ПРОФИЛЬ' }, // Profile
   ];
 

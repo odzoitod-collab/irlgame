@@ -124,7 +124,8 @@ export interface JobPosition {
   vertical: string;
   salaryPerClick: number;
   passiveIncome: number;
-  requiredReputation: number;
+  requiredLevel: number; // XP-based level requirement
+  requiredReputation: number; // status / luxury rep requirement
   costToPromote: number;
   isManager: boolean;
   reqBusinessStage: BusinessStage; 
@@ -155,6 +156,20 @@ export interface DropItem {
   icon: string;
 }
 
+export type SupplyEffectType = 'XP' | 'REPUTATION' | 'RISK_REDUCE' | 'CONSUMABLES_DISCOUNT';
+
+export interface SupplyItem {
+  id: string;
+  name: string;
+  description: string;
+  cost: number;
+  sellPrice: number;
+  effectType: SupplyEffectType;
+  effectValue: number;
+  durationMs?: number;
+  icon: string;
+}
+
 export interface OwnedDrop {
   id: string;
   fear: number;
@@ -176,9 +191,25 @@ export interface GameState {
   lifetimeEarnings: number;
   reputation: number;
   experience: number; 
+  moneyMovedWindow: number; // rolling measure of big movements
+  lastPassiveIncomeSnapshot: number;
+  trafficUnits: number;
+  suppliesUnits: number;
+  lastTrafficTickTime: number;
+  trafficDebuffUntil: number;
+  trafficDebuffMultiplier: number; // 0.3..1.0
+  bankLimitBlockUntil: number;
+  bankLimitBlockAmount: number;
+  frozenFunds: number;
+  frozenFundsReleaseTime: number;
+  consumablesCostMultiplierUntil: number;
+  consumablesCostMultiplier: number;
   clickValue: number;
   profitPerSecond: number; 
   riskLevel: number; 
+  lastConsumablesPurchaseTime: number;
+  lastFineTime: number;
+  lastRiskSmsThreshold: number; // last threshold (50/70) that already triggered SMS
   upgrades: Record<string, number>; 
   properties: Record<string, number>; 
   launderingUpgrades: Record<string, number>; 
@@ -187,6 +218,7 @@ export interface GameState {
   assetPrices: Record<string, number>; 
   activeSchemes: ActiveScheme[];
   ownedDrops: Record<string, OwnedDrop>;
+  supplies: Record<string, number>;
   currentJobId: string;
   lastPromotionTime: number; 
   hasBusiness: boolean;
@@ -208,7 +240,23 @@ export const INITIAL_STATE: GameState = {
   clickValue: 1,
   reputation: 0,
   experience: 0,
+  moneyMovedWindow: 0,
+  lastPassiveIncomeSnapshot: 0,
+  trafficUnits: 0,
+  suppliesUnits: 0,
+  lastTrafficTickTime: 0,
+  trafficDebuffUntil: 0,
+  trafficDebuffMultiplier: 1,
+  bankLimitBlockUntil: 0,
+  bankLimitBlockAmount: 0,
+  frozenFunds: 0,
+  frozenFundsReleaseTime: 0,
+  consumablesCostMultiplierUntil: 0,
+  consumablesCostMultiplier: 1,
   riskLevel: 0,
+  lastConsumablesPurchaseTime: Date.now(),
+  lastFineTime: 0,
+  lastRiskSmsThreshold: 0,
   upgrades: {},
   properties: {},
   launderingUpgrades: {}, 
@@ -217,6 +265,7 @@ export const INITIAL_STATE: GameState = {
   assetPrices: {},
   activeSchemes: [],
   ownedDrops: {},
+  supplies: {},
   currentJobId: 'job_start',
   lastPromotionTime: 0,
   hasBusiness: false,

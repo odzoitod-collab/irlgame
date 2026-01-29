@@ -205,20 +205,30 @@ export const AssetsTab: React.FC<AssetsTabProps> = ({
         )}
 
         {financeTab === 'LUXURY' && (
-            <div className="grid grid-cols-2 gap-3 pb-24">
-                {PROPERTIES.map(p => {
-                    const count = gameState.properties?.[p.id] || 0;
-                    const cost = calculateUpgradeCost(p.baseCost, count);
-                    const canBuy = gameState.balance >= cost;
-                    return (
-                    <button key={p.id} onClick={() => buyProperty(p)} disabled={!canBuy} className={`relative overflow-hidden p-4 rounded-3xl flex flex-col items-center text-center transition-all active:scale-95 ${canBuy ? 'bg-surface hover:bg-surfaceHighlight border border-white/10' : 'bg-surface/50 opacity-60 border border-transparent'}`}>
-                        <div className="text-white mb-2 text-3xl drop-shadow-md">{p.image.includes('http') ? <img src={p.image} className="w-8 h-8"/> : p.image}</div>
-                        <div className="text-xs font-black text-white uppercase tracking-wide leading-tight mb-1">{p.name}</div>
-                        <div className={`px-3 py-1 rounded-lg text-[10px] font-mono font-bold mt-2 ${canBuy ? 'bg-success text-white' : 'bg-surfaceHighlight text-slate-500'}`}>{formatMoney(cost)}</div>
-                        {count > 0 && <div className="absolute top-3 right-3 text-[9px] font-black bg-white text-black w-5 h-5 flex items-center justify-center rounded-full shadow-md">{count}</div>}
-                    </button>
-                    )
-                })}
+            <div className="space-y-4 pb-24">
+                <div className="p-4 bg-surfaceHighlight/60 border border-white/10 rounded-2xl">
+                    <div className="text-[10px] text-slate-300 font-black uppercase tracking-widest">Зачем “Лакшери”?</div>
+                    <p className="text-[10px] text-slate-400 font-bold mt-1 leading-snug">
+                        Лакшери — это не доход. Это <span className="text-white">репутация</span>, которая открывает должности и доступ к более сильным возможностям.
+                        Чем больше репы, тем выше “уровень” в карьере.
+                    </p>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                    {PROPERTIES.map(p => {
+                        const count = gameState.properties?.[p.id] || 0;
+                        const cost = calculateUpgradeCost(p.baseCost, count);
+                        const canBuy = gameState.balance >= cost;
+                        return (
+                        <button key={p.id} onClick={() => buyProperty(p)} disabled={!canBuy} className={`relative overflow-hidden p-4 rounded-3xl flex flex-col items-center text-center transition-all active:scale-95 ${canBuy ? 'bg-surface hover:bg-surfaceHighlight border border-white/10' : 'bg-surface/50 opacity-60 border border-transparent'}`}>
+                            <div className="text-white mb-2 text-3xl drop-shadow-md">{p.image.includes('http') ? <img src={p.image} className="w-8 h-8"/> : p.image}</div>
+                            <div className="text-xs font-black text-white uppercase tracking-wide leading-tight mb-1">{p.name}</div>
+                            <div className="text-[9px] font-bold text-slate-400">+{p.reputationBonus} реп</div>
+                            <div className={`px-3 py-1 rounded-lg text-[10px] font-mono font-bold mt-2 ${canBuy ? 'bg-success text-white' : 'bg-surfaceHighlight text-slate-500'}`}>{formatMoney(cost)}</div>
+                            {count > 0 && <div className="absolute top-3 right-3 text-[9px] font-black bg-white text-black w-5 h-5 flex items-center justify-center rounded-full shadow-md">{count}</div>}
+                        </button>
+                        )
+                    })}
+                </div>
             </div>
         )}
 

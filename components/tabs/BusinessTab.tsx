@@ -165,6 +165,17 @@ export const BusinessTab: React.FC<BusinessTabProps> = ({ gameState, setGameStat
 
         {businessTab === 'SOFT' && (
              <div className="space-y-4">
+                 {!gameState.hasBusiness ? (
+                    <div className="bg-surface p-6 rounded-3xl text-center border border-dashed border-white/10">
+                        <div className="w-16 h-16 bg-surfaceHighlight rounded-full mx-auto mb-4 flex items-center justify-center text-3xl">🚫</div>
+                        <h3 className="text-xl font-black text-white mb-2">Сначала создайте команду</h3>
+                        <p className="text-xs text-slate-400 mb-6 leading-relaxed">Софт доступен только после создания своей команды.</p>
+                        <button onClick={() => setBusinessTab('TEAM')} className="w-full py-4 rounded-2xl bg-accent text-white font-black uppercase tracking-widest active:scale-95 transition-transform shadow-lg shadow-accent/20">
+                            Перейти к созданию команды
+                        </button>
+                    </div>
+                 ) : (
+                 <>
                  <div className="p-4 bg-primary/10 rounded-2xl text-xs text-primary font-bold border border-primary/20 mb-2">
                      💡 Софт необходим, чтобы воркеры приносили доход. Чем лучше софт, тем больше приносит каждый воркер.
                  </div>
@@ -190,6 +201,8 @@ export const BusinessTab: React.FC<BusinessTabProps> = ({ gameState, setGameStat
                         </div>
                     );
                 })}
+                 </>
+                 )}
              </div>
         )}
 
@@ -198,6 +211,43 @@ export const BusinessTab: React.FC<BusinessTabProps> = ({ gameState, setGameStat
                  <div className="p-4 bg-primary/10 rounded-2xl text-xs text-primary font-bold border border-primary/20 mb-2">
                      📈 Трафик работает как множитель дохода. +10% Трафика = +10% к доходу всей команды.
                  </div>
+
+                 <div className="bg-surface p-5 rounded-3xl border border-white/5">
+                     <div className="flex justify-between items-center mb-3">
+                         <div>
+                             <div className="text-white font-black text-sm uppercase">Запас трафика</div>
+                             <div className="text-xs text-slate-400 font-bold mt-1">Единицы: <span className="font-mono text-white">{Math.floor(gameState.trafficUnits || 0)}</span></div>
+                         </div>
+                     </div>
+                     <div className="grid grid-cols-3 gap-2">
+                         {[
+                             { id: 'traf_pack_small', name: '+25', units: 25, cost: 2500 },
+                             { id: 'traf_pack_mid', name: '+150', units: 150, cost: 15000 },
+                             { id: 'traf_pack_big', name: '+1000', units: 1000, cost: 120000 }
+                         ].map(p => {
+                             const canBuy = gameState.balance >= p.cost;
+                             return (
+                                 <button
+                                     key={p.id}
+                                     onClick={() => {
+                                         if (!canBuy) return;
+                                         setGameState(prev => ({
+                                             ...prev,
+                                             balance: prev.balance - p.cost,
+                                             trafficUnits: (prev.trafficUnits || 0) + p.units
+                                         }));
+                                     }}
+                                     disabled={!canBuy}
+                                     className={`py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-transform ${canBuy ? 'bg-primary text-white' : 'bg-surfaceHighlight text-slate-500'}`}
+                                 >
+                                     {p.name}
+                                     <div className="text-[9px] font-mono opacity-80">{formatMoney(p.cost)}</div>
+                                 </button>
+                             );
+                         })}
+                     </div>
+                 </div>
+
                  {MARKET_ITEMS.filter(u => u.type === UpgradeType.TRAFFIC).map(u => {
                     const level = gameState.upgrades[u.id] || 0;
                     const cost = calculateUpgradeCost(u.baseCost, level);
@@ -224,6 +274,42 @@ export const BusinessTab: React.FC<BusinessTabProps> = ({ gameState, setGameStat
              <div className="space-y-4">
                  <div className="p-4 bg-primary/10 rounded-2xl text-xs text-primary font-bold border border-primary/20 mb-2">
                      🛡️ Расходники необходимы для безопасной работы. VPN и Proxy защищают твою команду.
+                 </div>
+
+                 <div className="bg-surface p-5 rounded-3xl border border-white/5">
+                     <div className="flex justify-between items-center mb-3">
+                         <div>
+                             <div className="text-white font-black text-sm uppercase">Запас расходников</div>
+                             <div className="text-xs text-slate-400 font-bold mt-1">Единицы: <span className="font-mono text-white">{Math.floor(gameState.suppliesUnits || 0)}</span></div>
+                         </div>
+                     </div>
+                     <div className="grid grid-cols-3 gap-2">
+                         {[
+                             { id: 'sup_pack_small', name: '+10', units: 10, cost: 1500 },
+                             { id: 'sup_pack_mid', name: '+60', units: 60, cost: 8000 },
+                             { id: 'sup_pack_big', name: '+400', units: 400, cost: 50000 }
+                         ].map(p => {
+                             const canBuy = gameState.balance >= p.cost;
+                             return (
+                                 <button
+                                     key={p.id}
+                                     onClick={() => {
+                                         if (!canBuy) return;
+                                         setGameState(prev => ({
+                                             ...prev,
+                                             balance: prev.balance - p.cost,
+                                             suppliesUnits: (prev.suppliesUnits || 0) + p.units
+                                         }));
+                                     }}
+                                     disabled={!canBuy}
+                                     className={`py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-transform ${canBuy ? 'bg-accent text-white' : 'bg-surfaceHighlight text-slate-500'}`}
+                                 >
+                                     {p.name}
+                                     <div className="text-[9px] font-mono opacity-80">{formatMoney(p.cost)}</div>
+                                 </button>
+                             );
+                         })}
+                     </div>
                  </div>
                  
                  {/* VPN Section */}

@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { GameState, INITIAL_STATE, Tab, UpgradeItem, UpgradeType, GameEvent, PropertyItem, LaunderingItem, AssetItem, SchemeItem, ActiveScheme, VerticalType, DropItem, OwnedDrop } from './types';
+import { GameState, INITIAL_STATE, Tab, UpgradeItem, UpgradeType, PropertyItem, LaunderingItem, AssetItem, SchemeItem, ActiveScheme, DropItem, SupplyItem } from './types';
 import { MARKET_ITEMS, CAREER_LADDER, BASE_BANK_LIMIT, ASSETS, PROPERTIES, LAUNDERING_ITEMS, TEAM_STRATEGIES, SCHEMES_LIST, CHARACTER_STAGES, SKILLS, DROPS } from './constants';
 import { formatMoney, calculateUpgradeCost } from './utils/format';
 import { ClickerCircle } from './components/ClickerCircle';
@@ -11,10 +10,21 @@ import { TopWidget } from './components/TopWidget';
 import { BusinessTab } from './components/tabs/BusinessTab';
 import { SchemesTab } from './components/tabs/SchemesTab';
 import { AssetsTab } from './components/tabs/AssetsTab';
+import { SuppliesTab } from './components/tabs/SuppliesTab';
 import { ProfileTab } from './components/tabs/ProfileTab';
 import { GuideContent } from './components/GuideContent';
 import { LoadingScreen } from './components/LoadingScreen';
-import { Siren, HardDrive, Zap } from 'lucide-react';
+import { Zap } from 'lucide-react';
+
+const CONSUMABLES_INTERVAL_MS = 5 * 60 * 1000;
+const TRAFFIC_TICK_INTERVAL_MS = 60 * 1000;
+const FINE_COOLDOWN_MS = 90 * 1000;
+const ECONOMY_NERF = 0.6; // make the whole game tougher
+
+const getPlayerLevel = (xp: number) => {
+  // Slow curve: lvl 1 ~ 25xp, lvl 10 ~ 2500xp, lvl 20 ~ 10000xp
+  return Math.max(0, Math.floor(Math.sqrt(Math.max(0, xp) / 25)));
+};
 
 const calculateDerivedStats = (state: GameState) => {
     const currentJob = CAREER_LADDER.find(j => j.id === state.currentJobId) || CAREER_LADDER[0];
@@ -37,13 +47,17 @@ const calculateDerivedStats = (state: GameState) => {
     let clickRentalBuff = 0;
     let basePotentialPerWorker = 0;
     let hasSoftware = false;
+    let trafficPassive = 0;
     let blackMarketPassive = 0;
     let securityPower = 0;
 
     MARKET_ITEMS.forEach(u => {
         const level = state.upgrades[u.id] || 0;
         if (level > 0) {
-            if (u.type === UpgradeType.TRAFFIC) trafficMultiplier += u.baseProfit * level;
+            if (u.type === UpgradeType.TRAFFIC) {
+                trafficMultiplier += u.baseProfit * level;
+                trafficPassive += u.baseProfit * 500 * level; // passive income from traffic
+            }
             if (u.type === UpgradeType.RENTAL) clickRentalBuff += u.baseProfit * level;
             if (u.type === UpgradeType.SOFTWARE) {
                 const codingBoost = 1 + (skillCodingLevel * 0.1);
@@ -59,11 +73,21 @@ const calculateDerivedStats = (state: GameState) => {
         }
     });
 
+    // Soft consequences
+    const now = Date.now();
+    if ((state.trafficDebuffUntil || 0) > now) {
+      trafficMultiplier *= Math.max(0.3, Math.min(1, state.trafficDebuffMultiplier || 1));
+    }
+    if ((state.bankLimitBlockUntil || 0) > now) {
+      bankLimit = Math.max(0, bankLimit - (state.bankLimitBlockAmount || 0));
+    }
+
     let scamIncome = 0;
     if (state.hasBusiness) {
         const strategyMult = TEAM_STRATEGIES[state.teamStrategy]?.multiplier || 1;
         const totalWorkers = state.workers * state.officeBranches;
-        if (hasSoftware) {
+        const hasTrafficUnits = (state.trafficUnits || 0) > 0;
+        if (hasSoftware && hasTrafficUnits) {
             const rawYield = basePotentialPerWorker * totalWorkers;
             const efficiency = state.workerSalaryRate * 2.5; 
             const gross = rawYield * efficiency * strategyMult;
@@ -79,11 +103,12 @@ const calculateDerivedStats = (state: GameState) => {
     });
 
     const jobPassive = currentJob.isManager ? currentJob.passiveIncome : 0;
-    const totalPassiveIncome = scamIncome + cleanIncome + jobPassive + (blackMarketPassive * trafficMultiplier);
+    const totalPassiveIncome = ((scamIncome + cleanIncome + jobPassive + blackMarketPassive + trafficPassive) * trafficMultiplier) * ECONOMY_NERF;
 
     const baseClick = state.clickValue + clickRentalBuff;
     const salaryClick = currentJob.salaryPerClick;
-    const currentClickValue = Math.floor((baseClick + salaryClick) * trafficMultiplier);
+    // Tap value should reflect rental upgrades directly (no extra scaling).
+    const currentClickValue = Math.max(1, Math.floor(baseClick + salaryClick));
 
     let passiveReputation = 0;
     PROPERTIES.forEach(p => {
@@ -91,12 +116,13 @@ const calculateDerivedStats = (state: GameState) => {
         passiveReputation += count * p.reputationBonus;
     });
 
-    const strategyRisk = TEAM_STRATEGIES[state.teamStrategy]?.risk || 0;
-    const dirtyFlow = scamIncome + blackMarketPassive;
-    const baseRiskGeneration = (dirtyFlow / 500) + strategyRisk + (currentJob.baseRisk || 0);
-    const riskMitigation = (cleanIncome / 100) + securityPower;
+    const dirtyFlow = blackMarketPassive;
+    const baseRiskGeneration = dirtyFlow / 200;
+    const riskMitigation = dirtyFlow > 0 ? (cleanIncome / 120) + securityPower : 0;
     const anonMitigationFactor = 1 - (skillAnonLevel * 0.05);
-    const netRiskChange = ((baseRiskGeneration * anonMitigationFactor) - riskMitigation) / 10;
+    const netRiskChange = dirtyFlow > 0
+      ? ((baseRiskGeneration * anonMitigationFactor) - riskMitigation) / 4
+      : -0.6;
 
     let portfolioValue = 0;
     ASSETS.forEach(a => {
@@ -136,7 +162,7 @@ const App: React.FC = () => {
         const saved = localStorage.getItem('scamTycoonSave_2Weeks_v1'); 
         if (saved) {
             const parsed = JSON.parse(saved);
-            return { ...INITIAL_STATE, ...parsed, isPanicMode: false, panicClicks: 0 };
+            return { ...INITIAL_STATE, ...parsed };
         }
     } catch (e) {}
     return INITIAL_STATE;
@@ -145,9 +171,9 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>(Tab.CLICKER);
   const [isManualOpen, setIsManualOpen] = useState(false);
   const [clicks, setClicks] = useState<{ id: number; x: number; y: number; val: string }[]>([]);
-  const [activeEvent, setActiveEvent] = useState<GameEvent | null>(null);
   const [activeMiniGame, setActiveMiniGame] = useState<string | null>(null);
   const [appLoading, setAppLoading] = useState(true);
+  const [smsAlert, setSmsAlert] = useState<{ title: string; message: string } | null>(null);
 
   const stats = calculateDerivedStats(gameState);
   const characterStageIndex = getCharacterImageIndex(gameState.currentJobId);
@@ -188,17 +214,87 @@ const App: React.FC = () => {
       const deltaSeconds = (now - lastTime) / 1000;
       lastTime = now;
 
-      if (deltaSeconds > 0 && !gameStateRef.current.isPanicMode) {
+      if (deltaSeconds > 0) {
         setGameState(prev => {
           const s = calculateDerivedStats(prev);
+
+          const isPanic = false;
           
-          // Passive Income
-          const income = s.totalPassiveIncome * deltaSeconds;
-          const actualBalance = Math.min(prev.balance + income, s.bankLimit);
+
+          // Passive Income (during panic mode: do NOT earn)
+          const income = isPanic ? 0 : (s.totalPassiveIncome * deltaSeconds);
+          let actualBalance = Math.min(prev.balance + income, s.bankLimit);
           
+          // Release frozen funds
+          let frozenFunds = prev.frozenFunds || 0;
+          let frozenFundsReleaseTime = prev.frozenFundsReleaseTime || 0;
+          if (frozenFunds > 0 && frozenFundsReleaseTime > 0 && now >= frozenFundsReleaseTime) {
+            const released = frozenFunds;
+            frozenFunds = 0;
+            frozenFundsReleaseTime = 0;
+            actualBalance = Math.min(actualBalance + released, s.bankLimit);
+            setSmsAlert({ title: 'SMS', message: `Разморозка средств: +${formatMoney(released)}.` });
+          }
+
           // Risk Update
           let newRisk = Math.max(0, Math.min(100, prev.riskLevel + (s.netRiskChange * deltaSeconds)));
-          if (newRisk >= 99 && Math.random() < 0.1 * deltaSeconds) return { ...prev, isPanicMode: true, panicClicks: 0 };
+
+          const incomeNow = s.totalPassiveIncome;
+
+          // Supplies: stock-based ops requirement every 5 minutes.
+          // If you have no supplies => losses + risk spike.
+          const stageMult = prev.businessStage === 'NETWORK' ? 4 : prev.businessStage === 'OFFICE' ? 2 : prev.businessStage === 'REMOTE_TEAM' ? 1.3 : 1;
+          const totalWorkers = prev.workers * prev.officeBranches;
+          const opsScale = 1 + totalWorkers / 12;
+          const consMult = (prev.consumablesCostMultiplierUntil || 0) > now ? (prev.consumablesCostMultiplier || 1) : 1;
+          const suppliesNeeded = Math.max(1, Math.ceil(stageMult * opsScale * consMult));
+          let lastConsumablesPurchaseTime = prev.lastConsumablesPurchaseTime || 0;
+          let suppliesUnits = prev.suppliesUnits || 0;
+          if (now - lastConsumablesPurchaseTime >= CONSUMABLES_INTERVAL_MS) {
+            if (suppliesUnits >= suppliesNeeded) {
+              suppliesUnits = suppliesUnits - suppliesNeeded;
+              lastConsumablesPurchaseTime = now;
+            } else {
+              const extraLoss = Math.max(500, Math.floor((prev.balance + income) * 0.15));
+              actualBalance = Math.max(0, actualBalance - extraLoss);
+              newRisk = Math.max(0, newRisk);
+              lastConsumablesPurchaseTime = now;
+              suppliesUnits = 0;
+            }
+          }
+
+          // Traffic: decays over time. If it hits 0, team income stops (handled in derived stats).
+          let trafficUnits = prev.trafficUnits || 0;
+          let lastTrafficTickTime = prev.lastTrafficTickTime || 0;
+          if (lastTrafficTickTime === 0) lastTrafficTickTime = now;
+          if (now - lastTrafficTickTime >= TRAFFIC_TICK_INTERVAL_MS) {
+            const trafficBurn = Math.max(1, Math.ceil((totalWorkers || 0) / 10));
+            trafficUnits = Math.max(0, trafficUnits - trafficBurn);
+            lastTrafficTickTime = now;
+          }
+
+          // High risk penalties: SMS + red mode + frequent fines
+          // - risk > 50 => one-time SMS, red tint
+          // - risk > 70 => 90% chance fine (cooldown protected)
+          let lastRiskSmsThreshold = prev.lastRiskSmsThreshold || 0;
+          if (newRisk >= 50 && lastRiskSmsThreshold < 50) {
+            lastRiskSmsThreshold = 50;
+            setSmsAlert({ title: 'SMS', message: 'Уровень розыска > 50. Тебя уже ищут. Любая ошибка — минус деньги.' });
+          }
+          if (newRisk >= 70 && lastRiskSmsThreshold < 70) {
+            lastRiskSmsThreshold = 70;
+            setSmsAlert({ title: 'SMS', message: 'Уровень розыска > 70. Шансы на штрафы и блоки почти гарантированы.' });
+          }
+          let lastFineTime = prev.lastFineTime || 0;
+          let trafficDebuffUntil = prev.trafficDebuffUntil || 0;
+          let trafficDebuffMultiplier = prev.trafficDebuffMultiplier || 1;
+          let bankLimitBlockUntil = prev.bankLimitBlockUntil || 0;
+          let bankLimitBlockAmount = prev.bankLimitBlockAmount || 0;
+          let consumablesCostMultiplierUntil = prev.consumablesCostMultiplierUntil || 0;
+          let consumablesCostMultiplier = prev.consumablesCostMultiplier || 1;
+
+          // NOTE: Random "stupidity" events removed.
+          // Losses now happen logically on конкретных инвестициях (buying stuff / schemes / exchange).
 
           // Schemes Progress
           const updatedSchemes = prev.activeSchemes.map(sch => {
@@ -222,6 +318,9 @@ const App: React.FC = () => {
               }
           });
 
+          // decay movement window over time
+          const nextMoneyMovedWindow = Math.max(0, (prev.moneyMovedWindow || 0) * Math.pow(0.86, deltaSeconds));
+
           return { 
             ...prev, 
             balance: Math.max(0, actualBalance - penalty), 
@@ -230,7 +329,25 @@ const App: React.FC = () => {
             reputation: prev.reputation + (s.passiveReputation * deltaSeconds),
             experience: prev.experience + (deltaSeconds * 0.1),
             ownedDrops: updatedDrops,
-            activeSchemes: updatedSchemes
+            activeSchemes: updatedSchemes,
+            lastConsumablesPurchaseTime,
+            lastFineTime,
+            lastRiskSmsThreshold,
+            moneyMovedWindow: nextMoneyMovedWindow,
+            lastPassiveIncomeSnapshot: incomeNow,
+            suppliesUnits,
+            trafficUnits,
+            lastTrafficTickTime,
+            trafficDebuffUntil,
+            trafficDebuffMultiplier,
+            bankLimitBlockUntil,
+            bankLimitBlockAmount,
+            frozenFunds,
+            frozenFundsReleaseTime,
+            consumablesCostMultiplierUntil,
+            consumablesCostMultiplier,
+            isPanicMode: false,
+            panicClicks: 0
           };
         });
       }
@@ -239,10 +356,6 @@ const App: React.FC = () => {
   }, []);
 
   const handleClick = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-    if (gameState.isPanicMode) {
-        setGameState(prev => ({ ...prev, panicClicks: prev.panicClicks + 1 }));
-        return;
-    }
     const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
     const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
     
@@ -263,17 +376,41 @@ const App: React.FC = () => {
     setGameState(prev => {
         const lvl = prev.upgrades[upgrade.id] || 0;
         const cost = calculateUpgradeCost(upgrade.baseCost, lvl);
-        if (prev.balance >= cost) return { ...prev, balance: prev.balance - cost, upgrades: { ...prev.upgrades, [upgrade.id]: lvl + 1 } };
+        if (prev.balance >= cost) {
+          // Realistic "bad investment": overpay / scam / wrong vendor
+          const isExpensive = cost >= 500000;
+          const isBlackish = upgrade.type === UpgradeType.BLACK_MARKET || upgrade.id.includes('ransom') || upgrade.id.includes('banker');
+          // Rare, small losses tied to the purchase amount.
+          const riskFactor = Math.min(1, prev.riskLevel / 100);
+          const baseChance = isBlackish ? 0.04 : isExpensive ? 0.02 : 0.01;
+          const dumbLossChance = baseChance + riskFactor * (isBlackish ? 0.03 : 0.02);
+          const lossRate = Math.min(0.15, (isBlackish ? 0.12 : 0.1) + riskFactor * 0.03);
+          const dumbLoss = Math.random() < dumbLossChance ? Math.floor(cost * lossRate) : 0;
+          if (dumbLoss > 0) {
+            const reason = isBlackish ? 'Кинул поставщик/палёный продавец на чёрном рынке' : 'Переплатил / купил мусорный софт';
+            setSmsAlert({ title: 'SMS', message: `${reason}: -${formatMoney(dumbLoss)} (часть инвестиции).` });
+          }
+          const moved = cost + dumbLoss;
+          return {
+            ...prev,
+            balance: Math.max(0, prev.balance - cost - dumbLoss),
+            upgrades: { ...prev.upgrades, [upgrade.id]: lvl + 1 },
+            riskLevel: Math.min(100, prev.riskLevel + (isBlackish ? 6 : 1) + (dumbLoss > 0 ? 2 : 0)),
+            moneyMovedWindow: (prev.moneyMovedWindow || 0) + moved
+          };
+        }
         return prev;
     });
   };
 
   const startScheme = (scheme: SchemeItem) => {
     setGameState(prev => {
-        if (prev.balance >= scheme.cost && prev.activeSchemes.length < 5) {
+        const trafficCost = scheme.category === 'BLACK' ? 2 : 1;
+        if (prev.balance >= scheme.cost && (prev.trafficUnits || 0) >= trafficCost && prev.activeSchemes.length < 5) {
             const now = Date.now();
             const newActive = { id: Math.random().toString(36), schemeId: scheme.id, startTime: now, endTime: now + (scheme.durationSeconds * 1000), isReady: false };
-            return { ...prev, balance: prev.balance - scheme.cost, activeSchemes: [...prev.activeSchemes, newActive] };
+            const isBlack = scheme.category === 'BLACK';
+            return { ...prev, balance: prev.balance - scheme.cost, trafficUnits: Math.max(0, (prev.trafficUnits || 0) - trafficCost), activeSchemes: [...prev.activeSchemes, newActive], riskLevel: Math.min(100, prev.riskLevel + (isBlack ? 4 : 1)), moneyMovedWindow: (prev.moneyMovedWindow || 0) + scheme.cost };
         }
         return prev;
     });
@@ -286,11 +423,24 @@ const App: React.FC = () => {
             const s = calculateDerivedStats(prev);
             const fail = Math.random() < (def.riskPercentage - (s.skillSocEngLevel * 2)) / 100;
             const profit = fail ? 0 : Math.floor(Math.random() * (def.maxProfit - def.minProfit)) + def.minProfit;
+            const isBlack = def.category === 'BLACK';
+            // Penalties must be tied to the investment (scheme cost), not to total balance.
+            // Fail means: seized goods, burned escrow, scammers above you.
+            const investment = def.cost;
+            const riskFactor = Math.min(1, prev.riskLevel / 100);
+            const penaltyRate = Math.min(0.15, (isBlack ? 0.12 : 0.1) + riskFactor * 0.03);
+            const extraPenalty = fail ? Math.floor(investment * penaltyRate) : 0;
+            if (extraPenalty > 0) {
+              const reason = isBlack ? 'Товар/закладка сгорела, часть забрали, часть списали' : 'Сорвалась тема: потеря на расходах/комиссиях';
+              setSmsAlert({ title: 'SMS', message: `${reason}: -${formatMoney(extraPenalty)} (от вложений).` });
+            }
+            const moved = profit + extraPenalty;
             return {
                 ...prev,
-                balance: Math.min(prev.balance + profit, s.bankLimit),
-                riskLevel: Math.min(100, prev.riskLevel + (fail ? def.riskPercentage / 3 : 1)),
-                activeSchemes: prev.activeSchemes.filter(a => a.id !== active.id)
+                balance: Math.min(Math.max(0, prev.balance + profit - extraPenalty), s.bankLimit),
+                riskLevel: Math.min(100, prev.riskLevel + (fail ? (isBlack ? def.riskPercentage : def.riskPercentage / 3) : (isBlack ? 6 : 1))),
+                activeSchemes: prev.activeSchemes.filter(a => a.id !== active.id),
+                moneyMovedWindow: (prev.moneyMovedWindow || 0) + moved
             };
         }
         return prev;
@@ -299,12 +449,107 @@ const App: React.FC = () => {
 
   const hireDrop = (d: DropItem) => setGameState(p => p.balance >= d.hireCost && !p.ownedDrops[d.id] ? { ...p, balance: p.balance - d.hireCost, ownedDrops: { ...p.ownedDrops, [d.id]: { id: d.id, fear: 0, lastPremiumTime: Date.now() } } } : p);
   const payDropPremium = (id: string) => setGameState(p => { const cost = Math.floor((DROPS.find(d => d.id === id)?.hireCost || 0) * 0.2); return p.balance >= cost ? { ...p, balance: p.balance - cost, ownedDrops: { ...p.ownedDrops, [id]: { ...p.ownedDrops[id], fear: Math.max(0, p.ownedDrops[id].fear - 40) } } } : p; });
-  const buyAsset = (a: AssetItem) => setGameState(p => { const pr = p.assetPrices[a.id] || a.basePrice; return p.balance >= pr ? { ...p, balance: p.balance - pr, ownedAssets: { ...p.ownedAssets, [a.id]: (p.ownedAssets[a.id] || 0) + 1 } } : p; });
-  const sellAsset = (a: AssetItem) => setGameState(p => { const count = p.ownedAssets[a.id] || 0; if (count > 0) { const pr = p.assetPrices[a.id] || a.basePrice; return { ...p, balance: Math.min(p.balance + pr, calculateDerivedStats(p).bankLimit), ownedAssets: { ...p.ownedAssets, [a.id]: count - 1 } }; } return p; });
+  const buyAsset = (a: AssetItem) => setGameState(p => {
+    const pr = p.assetPrices[a.id] || a.basePrice;
+    const fee = Math.max(1, Math.floor(pr * 0.01)); // 1% fee
+    if (p.balance < pr + fee) return p;
+    // Slippage / bad entry is a percent of the investment (price), not of balance.
+    const riskFactor = Math.min(1, p.riskLevel / 100);
+    const slipChance = 0.02 + riskFactor * 0.03; // 2%..5%
+    const slipRate = Math.min(0.15, 0.1 + riskFactor * 0.05); // 10%..15% of pr
+    const slippage = Math.random() < slipChance ? Math.floor(pr * slipRate) : 0;
+    if (slippage > 0) setSmsAlert({ title: 'SMS', message: `Плохой вход / проскальзывание: -${formatMoney(slippage)} (от инвестиции).` });
+    return {
+      ...p,
+      balance: Math.max(0, p.balance - pr - fee - slippage),
+      ownedAssets: { ...p.ownedAssets, [a.id]: (p.ownedAssets[a.id] || 0) + 1 },
+      riskLevel: Math.min(100, p.riskLevel + (slippage > 0 ? 1 : 0)),
+      moneyMovedWindow: (p.moneyMovedWindow || 0) + pr + fee + slippage
+    };
+  });
+  const sellAsset = (a: AssetItem) => setGameState(p => {
+    const count = p.ownedAssets[a.id] || 0;
+    if (count <= 0) return p;
+    const pr = p.assetPrices[a.id] || a.basePrice;
+    const fee = Math.max(1, Math.floor(pr * 0.01));
+    return {
+      ...p,
+      balance: Math.min(p.balance + Math.max(0, pr - fee), calculateDerivedStats(p).bankLimit),
+      ownedAssets: { ...p.ownedAssets, [a.id]: count - 1 },
+      moneyMovedWindow: (p.moneyMovedWindow || 0) + pr
+    };
+  });
   const buyProperty = (pr: PropertyItem) => setGameState(p => { const lvl = p.properties[pr.id] || 0; const cost = calculateUpgradeCost(pr.baseCost, lvl); return p.balance >= cost ? { ...p, balance: p.balance - cost, properties: { ...p.properties, [pr.id]: lvl + 1 }, reputation: p.reputation + pr.reputationBonus } : p; });
   const upgradeSkill = (id: string) => setGameState(p => { const s = SKILLS.find(sk => sk.id === id); const lvl = p.skills[id] || 0; const cost = Math.floor((s?.baseExpCost || 0) * Math.pow(1.5, lvl)); return s && p.experience >= cost && lvl < s.maxLevel ? { ...p, experience: p.experience - cost, skills: { ...p.skills, [id]: lvl + 1 } } : p; });
   const upgradeLaunderingItem = (i: LaunderingItem) => setGameState(p => { const lvl = p.launderingUpgrades[i.id] || 0; const cost = calculateUpgradeCost(i.baseCost, lvl); return p.balance >= cost ? { ...p, balance: p.balance - cost, launderingUpgrades: { ...p.launderingUpgrades, [i.id]: lvl + 1 } } : p; });
-  const promote = (id: string) => setGameState(p => { const job = CAREER_LADDER.find(j => j.id === id); return job && p.balance >= job.costToPromote ? { ...p, balance: p.balance - job.costToPromote, currentJobId: id, lastPromotionTime: Date.now() } : p; });
+  const promote = (id: string) => setGameState(p => {
+    const job = CAREER_LADDER.find(j => j.id === id);
+    if (!job) return p;
+    // Career is by "level": use reputation threshold + requirements, no cooldown, no promo cost.
+    const level = getPlayerLevel(p.experience);
+    const hasReqLvl = level >= (job.requiredLevel || 0);
+    const hasReqRep = p.reputation >= job.requiredReputation;
+    const hasReqUpgrade = job.reqUpgradeId ? (p.upgrades[job.reqUpgradeId] || 0) > 0 : true;
+    const hasReqProp = job.reqPropertyId ? (p.properties[job.reqPropertyId] || 0) > 0 : true;
+    const hasReqWorkers = job.reqWorkers ? (p.workers >= job.reqWorkers) : true;
+    const hasReqStage = (p.businessStage === job.reqBusinessStage) || (job.reqBusinessStage === 'NONE');
+    const ok = hasReqLvl && hasReqRep && hasReqUpgrade && hasReqProp && hasReqWorkers && hasReqStage;
+    return ok ? { ...p, currentJobId: id } : p;
+  });
+
+  const buySupply = (item: SupplyItem) => {
+    setGameState(prev => {
+      if (prev.balance < item.cost) return prev;
+      return {
+        ...prev,
+        balance: Math.max(0, prev.balance - item.cost),
+        supplies: { ...prev.supplies, [item.id]: (prev.supplies?.[item.id] || 0) + 1 }
+      };
+    });
+  };
+
+  const sellSupply = (item: SupplyItem) => {
+    setGameState(prev => {
+      const count = prev.supplies?.[item.id] || 0;
+      if (count <= 0) return prev;
+      return {
+        ...prev,
+        balance: Math.max(0, prev.balance + item.sellPrice),
+        supplies: { ...prev.supplies, [item.id]: count - 1 }
+      };
+    });
+  };
+
+  const useSupply = (item: SupplyItem) => {
+    setGameState(prev => {
+      const count = prev.supplies?.[item.id] || 0;
+      if (count <= 0) return prev;
+
+      const nextSupplies = { ...prev.supplies, [item.id]: count - 1 };
+      const now = Date.now();
+
+      if (item.effectType === 'XP') {
+        return { ...prev, supplies: nextSupplies, experience: prev.experience + item.effectValue };
+      }
+      if (item.effectType === 'REPUTATION') {
+        return { ...prev, supplies: nextSupplies, reputation: prev.reputation + item.effectValue };
+      }
+      if (item.effectType === 'RISK_REDUCE') {
+        return { ...prev, supplies: nextSupplies, riskLevel: Math.max(0, prev.riskLevel - item.effectValue) };
+      }
+      if (item.effectType === 'CONSUMABLES_DISCOUNT') {
+        const durationMs = item.durationMs || 5 * 60 * 1000;
+        return {
+          ...prev,
+          supplies: nextSupplies,
+          consumablesCostMultiplierUntil: now + durationMs,
+          consumablesCostMultiplier: item.effectValue
+        };
+      }
+
+      return { ...prev, supplies: nextSupplies };
+    });
+  };
 
   // Fix: handleMiniGameComplete to receive rewards from laundering mini-games
   const handleMiniGameComplete = (reward: number) => {
@@ -320,27 +565,26 @@ const App: React.FC = () => {
     setActiveMiniGame(null);
   };
 
-  const endPanicMode = () => {
-    const saved = Math.min(1, gameState.panicClicks / 40);
-    const penalty = Math.floor(gameState.balance * (0.4 * (1 - saved)));
-    setGameState(prev => ({ ...prev, balance: Math.max(0, prev.balance - penalty), isPanicMode: false, riskLevel: 5, panicClicks: 0 }));
-  };
-
   return (
-    <div className={`relative w-full h-screen flex flex-col overflow-hidden bg-background text-white`}>
+    <div className={`relative w-full h-screen flex flex-col overflow-hidden bg-background text-white ${gameState.riskLevel >= 50 ? 'outline outline-1 outline-red-500/30' : ''}`}>
       {appLoading && <LoadingScreen onFinished={() => setAppLoading(false)} />}
-      
-      {gameState.isPanicMode && (
-          <div className="fixed inset-0 z-[100] bg-red-950/90 backdrop-blur-md flex flex-col items-center justify-center p-8 text-center">
-              <Siren size={80} className="text-red-500 animate-bounce mb-8" />
-              <h2 className="text-4xl font-black uppercase mb-12">ОБЛАВА!</h2>
-              <button onMouseDown={() => setGameState(p => ({ ...p, panicClicks: p.panicClicks + 1 }))} className="w-48 h-48 bg-red-600 rounded-full flex items-center justify-center shadow-2xl active:scale-90 transition-transform mb-8">
-                  <HardDrive size={64} className="text-white" />
-              </button>
-              <div className="w-full max-w-xs h-2 bg-red-900 rounded-full overflow-hidden">
-                  <div className="h-full bg-white animate-shrink origin-left" style={{ animationDuration: '6s' }} onAnimationEnd={endPanicMode}/>
+
+      {gameState.riskLevel >= 50 && (
+        <div className="fixed inset-0 z-[40] pointer-events-none bg-red-950/10 mix-blend-screen" />
+      )}
+
+      {smsAlert && (
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[90] w-[92%] max-w-[420px] pointer-events-auto">
+          <div className={`rounded-2xl border p-4 backdrop-blur-xl shadow-2xl ${gameState.riskLevel >= 70 ? 'bg-red-950/60 border-red-500/40' : 'bg-surface/60 border-white/10'}`}>
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">{smsAlert.title}</div>
+                <div className="text-sm font-bold text-white mt-1">{smsAlert.message}</div>
               </div>
+              <button className="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest bg-white text-black" onClick={() => setSmsAlert(null)}>Ок</button>
+            </div>
           </div>
+        </div>
       )}
 
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden bg-background opacity-20">
@@ -348,14 +592,19 @@ const App: React.FC = () => {
           <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
       </div>
 
-      <TopWidget currentJob={stats.currentJob} bankLimit={stats.bankLimit} balance={gameState.balance} isBankFull={stats.isBankFull} />
+      <TopWidget currentJob={stats.currentJob} bankLimit={stats.bankLimit} balance={gameState.balance} isBankFull={stats.isBankFull} riskLevel={gameState.riskLevel} level={getPlayerLevel(gameState.experience)} />
 
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center -mt-12">
           <div className="flex flex-col items-center animate-bounce-soft">
               <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">BALANCE</span>
               <h1 className={`text-6xl font-mono font-black ${stats.isBankFull ? 'text-red-500' : 'text-white'}`}>{formatMoney(gameState.balance)}</h1>
-              <div className="mt-2 text-[10px] font-bold text-success bg-surfaceHighlight px-3 py-1 rounded-full border border-white/5 flex items-center gap-2">
-                  <Zap size={14} className="text-yellow-500 animate-pulse" /> {formatMoney(stats.totalPassiveIncome)}/s
+              <div className="mt-2 flex items-center gap-2">
+                <div className="text-[10px] font-bold text-slate-200 bg-surfaceHighlight px-3 py-1 rounded-full border border-white/5">
+                  Репутация: <span className="font-mono font-black">{Math.floor(gameState.reputation)}</span>
+                </div>
+                <div className="text-[10px] font-bold text-success bg-surfaceHighlight px-3 py-1 rounded-full border border-white/5 flex items-center gap-2">
+                    <Zap size={14} className="text-yellow-500 animate-pulse" /> {formatMoney(stats.totalPassiveIncome)}/s
+                </div>
               </div>
           </div>
       </div>
@@ -374,6 +623,9 @@ const App: React.FC = () => {
       </BottomSheet>
       <BottomSheet isOpen={activeTab === Tab.MARKET} onClose={() => setActiveTab(Tab.CLICKER)} title="АКТИВЫ">
           <AssetsTab gameState={gameState} isBankFull={stats.isBankFull} portfolioValue={stats.portfolioValue} upgradeLaunderingItem={upgradeLaunderingItem} buyUpgrade={buyUpgrade} buyAsset={buyAsset} sellAsset={sellAsset} buyProperty={buyProperty} setActiveMiniGame={setActiveMiniGame} hireDrop={hireDrop} payDropPremium={payDropPremium} />
+      </BottomSheet>
+      <BottomSheet isOpen={activeTab === ('SUPPLIES' as Tab)} onClose={() => setActiveTab(Tab.CLICKER)} title="ЛАВКА">
+          <SuppliesTab gameState={gameState} buySupply={buySupply} sellSupply={sellSupply} useSupply={useSupply} />
       </BottomSheet>
       <BottomSheet isOpen={activeTab === Tab.PROFILE} onClose={() => setActiveTab(Tab.CLICKER)} title="ПРОФИЛЬ">
           <ProfileTab gameState={gameState} currentJob={stats.currentJob} promote={promote} openManual={() => setIsManualOpen(true)} upgradeSkill={upgradeSkill} />
