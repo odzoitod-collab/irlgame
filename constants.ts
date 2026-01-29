@@ -213,7 +213,7 @@ export const PROPERTIES: PropertyItem[] = [
 
 export const MARKET_ITEMS: UpgradeItem[] = [
   // RENTAL buffs (tap is intentionally weak now)
-  { id: 'tool_vpn', name: 'Приватный VPN', type: UpgradeType.RENTAL, vertical: VerticalType.TRAFFIC, baseCost: 50, baseProfit: 5, level: 0, description: '+5 Тап' },
+  { id: 'tool_vpn', name: 'Приватный VPN', type: UpgradeType.RENTAL, vertical: VerticalType.TRAFFIC, baseCost: 50, baseProfit: 2, level: 0, description: '+5 Тап' },
 
   // TRAFFIC (main source of scaling)
   { id: 'tool_spam_soft', name: 'AI Спамер', type: UpgradeType.TRAFFIC, vertical: VerticalType.TRAFFIC, baseCost: 8000, baseProfit: 0.12, level: 0, description: '+12% Трафик/доход' },
